@@ -1,3 +1,11 @@
 #Jia Rong Wu
 #Copyright (c) 2014. All Rights Reserved.
 #Repository for Biochem3383F/G
+
+# Old implementation utilized perl, with hash table insetion and quicksort.
+# Insertion: Theory: O(1), but approaches O(n^2) in practice due to the sheer number of entries being inserted by property of rehashing.
+# Sorting: Theory: O(nlogn) but may approach O(n^2) in practice due to quicksort's random choice of pivots.
+
+# I will be implementing in C, with a potential tree (AVL/ balanced) structure.
+# Insertion: Theory: 2*O(nlogn) guaranteed performance for insertion.
+# Sorting: Theory: O(n) traversal of 2nd tree.
