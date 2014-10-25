@@ -12,54 +12,48 @@
 
 
 // Function Prototypes (private functions)
-avlNode avlTree_insert_helper(avlNode node, char* seq, char* identifier);
+avlNode avlTree_insert_helper(avlNode *node, char* seq, char* identifier);
 
 
-/**
- *
- */
 avlTree avlTree_init(void)
 {
 	avlTree tree;
 	tree = (avlTree) malloc(sizeof(avlNode));
-	tree = NULL;
+	*tree = NULL;
 	return tree;
 }
 
-void avlTree_insert(avlTree tree, avlNode node, char* seq, char* identifier)
+avlNode* avlTree_insert(avlTree tree, char* s, char* id)
 {
-	if (tree == NULL) //Case where root is empty
+	if (*tree == NULL)
 	{
-		tree->count = 0;
-		tree->left_child = malloc(sizeof(avlNode));
-		tree->right_child = malloc(sizeof(avlNode));
+		(*tree) = (avlNode*) malloc (sizeof(avlNode));
+		(*tree) -> count = 0;
+		(*tree) -> seq = s;
+		(*tree) -> identifier = id;
+		return *tree;
 	}
-	else // Info exists at node
+	else
 	{
-		int comparator = strcmp(tree->seq, seq);
+		int comparator = strcmp((*tree)->seq, s);
 		if (comparator < 0) // 1 less than 2, insert right
 		{
-			*tree->right_child = avlTree_insert_helper(node, seq, identifier);
+			(*tree)->right_child = avlTree_insert(&(*tree)->right_child,s,id);
+			((*tree)->right_child)->parent = *tree;
 		}
 		else if (comparator > 0) // 1 greater than 2, insert left
 		{
-			*tree->left_child = avlTree_insert_helper(node, seq, identifier);
+			(*tree)->left_child = avlTree_insert(&(*tree)->left_child,s,id);
+			((*tree)->left_child)->parent = *tree;
 		}
-		else // Strings equivalent
+		else // Strings equivalent, increment counter
 		{
-			
+			(*tree)->count ++;
+			return (*tree);
 		}
-
 	}
+	return *tree;
 }
-
-avlNode avlTree_insert_helper(avlNode node, char* seq, char* identifier)
-{
-	
-	return node;
-}
-
-
 
 
 

@@ -15,20 +15,21 @@
 
 
 // avlNode represents a node in the tree
-typedef struct avlNode
+typedef struct node
 {
     int count;
-    char seq[MAX_SEQ_LENGTH];
-    char identifier [MAX_SEQ_LENGTH];
+    char* seq;
+    char* identifier;
     
-    struct avlNode* left_child;
-    struct avlNode* right_child;
-    struct avlNode* parent;
+    struct node* left_child;
+    struct node* right_child;
+    struct node* parent;
     
-} avlNode;
+} node;
 
 
-typedef avlNode* avlTree; // Represents a pointer to the first node in the tree
+typedef node avlNode; // Represents an  avlNode
+typedef avlNode** avlTree; // Represents a pointer to an avlTree
 
 #endif /* defined(__group_gt1__avlTree__) */
 
@@ -36,5 +37,5 @@ typedef avlNode* avlTree; // Represents a pointer to the first node in the tree
 
 // Function Prototypes
 avlTree avlTree_init(void);
-void avlTree_insert(avlTree, char* seq, char* identifier);
+avlNode* avlTree_insert(avlTree, char* seq, char* identifier);
 int node_count(avlTree, char*seq);
