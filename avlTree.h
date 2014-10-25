@@ -1,11 +1,18 @@
-//
-//  avlTree.h
-//  group_gt1
-//
-//  Created by Jia Wu on 2014-10-24.
-//  Copyright (c) 2014 Jia Wu. All rights reserved.
-//
-
+/********************************************************************************
+ * avlTree.h
+ *
+ * To be used as the data structure for group_gt1
+ * Version 1.0
+ *
+ * Author: Jia Rong Wu
+ * jwu424@uwo.ca
+ *
+ * This software is Copyright 2014 Jia Rong Wu and is distrubuted under the terms
+ * of the GNU General Public License.
+ *
+ * avlTree.h represents the typedefs and function prototypes that represent a 
+ * tree data structure with guaranteed height (AVL)
+ *******************************************************************************/
 #ifndef __group_gt1__avlTree__
 #define __group_gt1__avlTree__
 #include <stdio.h>
@@ -39,3 +46,4 @@ typedef avlNode** avlTree; // Represents a pointer to an avlTree
 avlTree avlTree_init(void);
 avlNode* avlTree_insert(avlTree, char* seq, char* identifier);
 int node_count(avlTree, char*seq);
+void inOrder_traversal(avlTree);
