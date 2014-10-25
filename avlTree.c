@@ -41,12 +41,16 @@ avlTree avlTree_init(void)
  */
 avlNode* avlTree_insert(avlTree tree, char* s, char* id)
 {
-    if (*tree == NULL) // Unique sequence
+    if (*tree == NULL) // Unique sequence [BASE CASE]
     {
         (*tree) = (avlNode*) malloc (sizeof(avlNode));
         (*tree) -> count = 1;       // Increment to 1 because unique
         (*tree) -> seq = s;         // Set sequence
         (*tree) -> identifier = id; // Set id
+        
+        (*tree) -> height = 0;      // Height is zero by default
+        
+        
         return *tree;
     }
     else
@@ -89,7 +93,14 @@ void inOrder_traversal(avlTree tree)
 }
 
 
-
+void reset_Height(avlTree tree)
+{
+    if ((*tree)->left_child == NULL || (*tree)->right_child == NULL) // Cannot do
+    {
+//        max(a, <#b#>)
+    }
+    
+}
 
 
 

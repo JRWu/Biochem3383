@@ -17,8 +17,11 @@
 // TO ADD:
 /**
  * Support for selecting "k" most frequent
- * Support for rebalancing tree
+ * Support for rebalancing tree to guarantee height balance
  * Support for comparisons if strcmp proves to be too unweildy
+ *
+ * May or May NOT support free() operations, as the operating system automatically
+ * frees any memory that this program has reserved
  */
 
 

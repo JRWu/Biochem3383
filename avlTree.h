@@ -19,12 +19,16 @@
 
 
 #define MAX_SEQ_LENGTH 300
-
+#ifndef max
+#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
+#endif
 
 // avlNode represents a node in the tree
 typedef struct node
 {
     int count;
+    int height; // Represents height of item in tree for rebalance property
+    
     char* seq;
     char* identifier;
     
