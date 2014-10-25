@@ -19,6 +19,7 @@ typedef struct avlNode
 {
     int count;
     char seq[MAX_SEQ_LENGTH];
+    char identifier [MAX_SEQ_LENGTH];
     
     struct avlNode* left_child;
     struct avlNode* right_child;
@@ -35,30 +36,5 @@ typedef avlNode* avlTree; // Represents a pointer to the first node in the tree
 
 // Function Prototypes
 avlTree avlTree_init(void);
-void avlTree_insert(avlTree, char* seq);
+void avlTree_insert(avlTree, char* seq, char* identifier);
 int node_count(avlTree, char*seq);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
