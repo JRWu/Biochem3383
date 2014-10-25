@@ -37,6 +37,7 @@ int main(int argc, const char * argv[]) {
      *MISC VALUES FOR TESTING
      */
     
+    inOrder_traversal(testTree);
     printf("Hello, World!\n");
     return 0;
 }
