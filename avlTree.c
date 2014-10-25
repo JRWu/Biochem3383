@@ -57,7 +57,15 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
 
 
 
-
+void inOrder_traversal(avlTree tree)
+{
+	if (*tree != NULL)
+	{
+		inOrder_traversal( &(*tree)->left_child );
+		printf("Seq: %s\n", (*tree)->seq);
+		inOrder_traversal( &(*tree)->right_child );
+	}
+}
 
 
 
