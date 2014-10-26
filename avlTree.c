@@ -97,10 +97,21 @@ void reset_Height(avlTree tree)
 {
     if ((*tree)->left_child == NULL || (*tree)->right_child == NULL) // Cannot do
     {
-//        max(a, <#b#>)
+//        max(a, b)
     }
     
 }
+
+bool external(avlNode node)
+{
+    if ((node).right_child == NULL && (node).left_child == NULL)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
 
 
 
