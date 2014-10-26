@@ -11,6 +11,7 @@
  * of the GNU General Public License.
  *
  * avlTree.c represents a tree data structure with guaranteed height (AVL)
+ * Can be used for efficient sorting or storage of any STRING/INT values
  *******************************************************************************/
 
 #include <stdlib.h>
@@ -20,7 +21,6 @@
 
 // Function Prototypes (private functions)
 int computeHeight(avlNode node);
-void reset_Height(avlTree tree);
 
 /**
  * avlTree_init allocates necessary memory for a pointer to the first element in a tree
@@ -47,21 +47,9 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         (*tree) = (avlNode*) malloc (sizeof(avlNode));
         (*tree) -> count = 1;       // Increment to 1 because unique
         (*tree) -> seq = s;         // Set sequence
-        (*tree) -> identifier = id; // Set id
+        (*tree) -> identifier = id; // Set id of the node
         
-        (*tree) -> height = 0;      // Height is zero by default
-        
-        /*/ NOT SURE IF NEEDED***************************
-        if ( (*tree)->left_child != NULL)
-        {
-            (*tree)-> height = max((*tree)->height, (*tree)->left_child->height);
-        }
-        if ( (*tree)->right_child != NULL)
-        {
-            (*tree)-> height = max((*tree)->height, (*tree)->right_child->height);
-        }
-        // NOT SURE IF NEEDED****************************/
-        
+        (*tree)->height = computeHeight(**tree);
         return *tree;
     }
     else
@@ -82,6 +70,9 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         }
         else // Strings equivalent, increment counter for seq
         {
+            
+            // Add code to append identifiers later*
+            
             (*tree)->count ++; // Increment seq counter
             return (*tree);
         }
@@ -100,24 +91,19 @@ void inOrder_traversal(avlTree tree)
     if (*tree != NULL)
     {
         inOrder_traversal( &(*tree)->left_child );
-        printf("Height: %d\n", (*tree)->height);
-        printf("Seq: %s\n", (*tree)->seq);
-        printf("Count: %d\n\n", (*tree)->count);
+        printf("Height: %d\n", (*tree)->height);    // DEBUG, REMOVE LATER
+        printf("Seq: %s\n", (*tree)->seq);          // DEBUG, REMOVE LATER
+        printf("Count: %d\n\n", (*tree)->count);    // DEBUG, REMOVE LATER
         inOrder_traversal( &(*tree)->right_child );
     }
 }
 
 
-void reset_Height(avlTree tree)
-{
-    if ((*tree)->left_child == NULL || (*tree)->right_child == NULL) // Cannot do
-    {
-//        max(a, b)
-    }
-    (*tree)->height = (1+ max((*tree)->left_child->height, (*tree)->right_child->height    ));
-    
-}
-
+/**
+ * external determines if a given node is a leaf node
+ * @node represents the node being checked
+ * @return true if the node is external, false otherwise
+ */
 bool external(avlNode node)
 {
     if ((node).right_child == NULL && (node).left_child == NULL)
@@ -128,27 +114,31 @@ bool external(avlNode node)
     return false;
 }
 
-
-
+/**
+ * computeHeight takes a given node and recursively calculates its height
+ * @node is the node whose height is being calculated
+ * @return the height of the node
+ */
 int computeHeight(avlNode node)
 {
     int left = 0;
     int right = 0;
-    // Need to handle null node checking here
-    if (external(node))
+
+    if (external(node)) // External nodes count as 0
     {
-        return 0;
+        return 1;
     }
-    if (node.left_child != NULL)
+    
+    if (node.left_child != NULL) // find left subtree height
     {
         left = computeHeight(*(node.left_child));
     }
-    if (node.right_child!=NULL)
+    if (node.right_child!=NULL) // find right subtree height
     {
         right = computeHeight(*(node.right_child));
     }
-
-    return (1+ max(left,right));
+    
+    return (1 + max(left,right)); // Return max of left and right + 1 for current
 }
 
 

@@ -16,14 +16,16 @@
 #ifndef __group_gt1__avlTree__
 #define __group_gt1__avlTree__
 #include <stdio.h>
-
+#include <stdbool.h>
 
 #define MAX_SEQ_LENGTH 300
 #ifndef max
-#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
+#define max( a, b ) ( ((a) > (b)) ? (a) : (b) ) // Function to determine max of 2 integers
 #endif
 
-// avlNode represents a node in the tree
+/**
+ * node represents a node in the tree
+ */
 typedef struct node
 {
     int count;
@@ -38,10 +40,8 @@ typedef struct node
     
 } node;
 
-
 typedef node avlNode; // Represents an  avlNode
 typedef avlNode** avlTree; // Represents a pointer to an avlTree
-
 #endif /* defined(__group_gt1__avlTree__) */
 
 
@@ -51,3 +51,7 @@ avlTree avlTree_init(void);
 avlNode* avlTree_insert(avlTree, char* seq, char* identifier);
 int node_count(avlTree, char*seq);
 void inOrder_traversal(avlTree);
+bool external(avlNode);
+
+
+// Deletion & Memory Free not supported because not necessary to sort

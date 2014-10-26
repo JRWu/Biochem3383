@@ -58,8 +58,6 @@ int main(int argc, const char * argv[]) {
     avlTree_insert(testTree, sequence, identifier);
     
     
-    
-    
     /*
      *MISC VALUES FOR TESTING
      */
