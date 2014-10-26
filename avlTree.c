@@ -19,7 +19,8 @@
 
 
 // Function Prototypes (private functions)
-avlNode avlTree_insert_helper(avlNode *node, char* seq, char* identifier);
+int computeHeight(avlNode node);
+void reset_Height(avlTree tree);
 
 /**
  * avlTree_init allocates necessary memory for a pointer to the first element in a tree
@@ -50,6 +51,16 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         
         (*tree) -> height = 0;      // Height is zero by default
         
+        /*/ NOT SURE IF NEEDED***************************
+        if ( (*tree)->left_child != NULL)
+        {
+            (*tree)-> height = max((*tree)->height, (*tree)->left_child->height);
+        }
+        if ( (*tree)->right_child != NULL)
+        {
+            (*tree)-> height = max((*tree)->height, (*tree)->right_child->height);
+        }
+        // NOT SURE IF NEEDED****************************/
         
         return *tree;
     }
@@ -60,11 +71,14 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         {
             (*tree)->right_child = avlTree_insert(&(*tree)->right_child,s,id);
             ((*tree)->right_child)->parent = *tree; // Set parent of new node
+            (*tree)->height = computeHeight(**tree); //ERROR
         }
         else if (comparator > 0) // New seq is less, insert left
         {
             (*tree)->left_child = avlTree_insert(&(*tree)->left_child,s,id);
             ((*tree)->left_child)->parent = *tree; // Set parent of new node
+            (*tree)->height = computeHeight(**tree); //ERROR
+
         }
         else // Strings equivalent, increment counter for seq
         {
@@ -86,8 +100,9 @@ void inOrder_traversal(avlTree tree)
     if (*tree != NULL)
     {
         inOrder_traversal( &(*tree)->left_child );
+        printf("Height: %d\n", (*tree)->height);
         printf("Seq: %s\n", (*tree)->seq);
-        printf("Count: %d\n", (*tree)->count);
+        printf("Count: %d\n\n", (*tree)->count);
         inOrder_traversal( &(*tree)->right_child );
     }
 }
@@ -99,6 +114,7 @@ void reset_Height(avlTree tree)
     {
 //        max(a, b)
     }
+    (*tree)->height = (1+ max((*tree)->left_child->height, (*tree)->right_child->height    ));
     
 }
 
@@ -112,6 +128,28 @@ bool external(avlNode node)
     return false;
 }
 
+
+
+int computeHeight(avlNode node)
+{
+    int left = 0;
+    int right = 0;
+    // Need to handle null node checking here
+    if (external(node))
+    {
+        return 0;
+    }
+    if (node.left_child != NULL)
+    {
+        left = computeHeight(*(node.left_child));
+    }
+    if (node.right_child!=NULL)
+    {
+        right = computeHeight(*(node.right_child));
+    }
+
+    return (1+ max(left,right));
+}
 
 
 
