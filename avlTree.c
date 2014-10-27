@@ -21,6 +21,8 @@
 
 // Function Prototypes (private functions)
 int computeHeight(avlNode node);
+void MakeLeftChild (avlNode* a, avlNode* b)
+void MakeRightChild (avlNode* a, avlNode* b)
 
 /**
  * avlTree_init allocates necessary memory for a pointer to the first element in a tree
@@ -141,6 +143,117 @@ int computeHeight(avlNode node)
     return (1 + max(left,right)); // Return max of left and right + 1 for current
 }
 
+avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalanced)
+{
+    avlNode* x = malloc (sizeof(avlNode));
+    x = grandchild;
+    avlNode* y = malloc (sizeof(avlNode));
+    y = child;
+    avlNode* z = malloc (sizeof(avlNode));
+    z = unbalanced;
+    
+    // CASES
+    // NOTE: If strcmp is too unweildy must fix this here (BOTTLENECK)
+    int zx;
+    int xy;
+    int zy;
+    
+    // Might have to call malloc for these
+    avlNode* a = malloc (sizeof(avlNode));
+    avlNode* b = malloc (sizeof(avlNode));
+    avlNode* c = malloc (sizeof(avlNode));
+    
+    if(zx <= 0 && xy <= 0) // If z <= x and x<=y
+   	{
+        a = z;
+        b = x;
+        c = y;
+   	}
+   	else if (zx >= 0 && xy >= 0) // If z>=x and x >=y
+   	{
+        a = y;
+        b = x;
+        c = z;
+   	}
+   	else if (zy <= 0 && xy >=0) // If z<=y and y <=x
+   	{
+        a = z;
+        b = y;
+        c = x;
+   	}
+    
+   	else //if(zy >=0 && xy <=0) // If z>=y and y >=x
+   	{
+        a = x;
+        b = y;
+        c = z;
+   	}
+   	
+    
+    
+    if (z->parent == NULL ) // Reached root
+    {
+        // Set left and right of b as z's left and right
+        // set left parent and right parent of z as b
+        // Remove parent of b
+        
+        z->left_child->parent = b;
+        z->right_child->parent = b;
+        
+        b->left_child = z->left_child;
+        b->right_child = z ->right_child;
+        
+        b->parent = NULL;
 
+    }
+    else // Replacing Z
+    {
+        if (z->parent->left_child == z)
+        {
+            MakeLeftChild(z->parent, b);
+//            z->parent->left_child = b;
+//            b->parent = z;
+        }
+        else
+        {
+            MakeRightChild(z->parent,b);
+//            z->parent->right_child = b;
+//            b->parent = z;
+        }
+    }
+    
+    if (b->left_child != x && b->left_child != y && b->left_child != z)
+    {
+//        a->right_child = b->left_child;
+//        b->right_child->parent = a;
+    }
+    
+    
+    
+    
+    
+    
+    // Need to support free operations here because restructure may be called "n" times
+    free(x);
+    free(y);
+    free(z);
+    free(a);
+    free(b);
+    free(c);
+    
+    return NULL;
+}
+
+void MakeLeftChild (avlNode* a, avlNode* b)
+{
+    a->left_child = b;
+    b->parent = a;
+}
+
+void MakeRightChild (avlNode* a, avlNode* b)
+{
+    a->right_child = b;
+    b->parent = a;
+}
 
 
