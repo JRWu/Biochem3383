@@ -153,10 +153,11 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     z = unbalanced;
     
     // CASES
+    // ADD STRCMP HERE
     // NOTE: If strcmp is too unweildy must fix this here (BOTTLENECK)
-    int zx;
-    int xy;
-    int zy;
+    int zx = strcmp(z->seq, x->seq);
+    int xy = strcmp(x->seq, y->seq);
+    int zy = strcmp(z->seq, y->seq);
     
     // Might have to call malloc for these
     avlNode* a = malloc (sizeof(avlNode));
