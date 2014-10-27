@@ -21,8 +21,8 @@
 
 // Function Prototypes (private functions)
 int computeHeight(avlNode node);
-void MakeLeftChild (avlNode* a, avlNode* b)
-void MakeRightChild (avlNode* a, avlNode* b)
+void MakeLeftChild (avlNode* a, avlNode* b);
+void MakeRightChild (avlNode* a, avlNode* b);
 
 /**
  * avlTree_init allocates necessary memory for a pointer to the first element in a tree
@@ -224,12 +224,18 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     if (b->left_child != x && b->left_child != y && b->left_child != z)
     {
+        MakeRightChild(a, b->left_child);
 //        a->right_child = b->left_child;
 //        b->right_child->parent = a;
     }
     
+    if (b->right_child != x && b->right_child != y && b->right_child != z)
+    {
+        MakeLeftChild(c,b->right_child);
+    }
     
-    
+    MakeLeftChild(b,a);
+    MakeRightChild(b,c);
     
     
     
