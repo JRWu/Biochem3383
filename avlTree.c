@@ -183,14 +183,13 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
         c = x;
    	}
     
-   	else //if(zy >=0 && xy <=0) // If z>=y and y >=x
+   	else //if(zy >=0 && xy <=0), or If z>=y and y >=x
    	{
         a = x;
         b = y;
         c = z;
    	}
    	
-    
     
     if (z->parent == NULL ) // Reached root
     {
@@ -250,6 +249,38 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     return NULL;
 }
+
+
+/**
+ * tallerChild takes a node and returns the taller of the 2 subtrees
+ * If even heights are returned, it will return subtree based on parental origin
+ * @n is the node being compared
+ * @return higher subtree given a node 
+ */
+avlNode tallerChild(avlNode n)
+{
+    if ((n.left_child->height) > (n.right_child->height))
+    {
+        return *n.left_child;
+    }
+    else if ((n.left_child->height) < (n.right_child->height))
+    {
+        return *n.right_child;
+    }
+    else
+    {
+        int comparator = strcmp (n.seq, n.parent->seq);
+        if (comparator < 0)
+        {
+            return *n.left_child;
+        }
+        else
+        {
+            return *n.right_child;
+        }
+    }
+}
+
 
 void MakeLeftChild (avlNode* a, avlNode* b)
 {
