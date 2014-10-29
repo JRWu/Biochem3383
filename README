@@ -3,9 +3,11 @@
 #Repository for Biochem3383F/G
 
 # Old implementation utilized perl, with hash table insetion and quicksort.
-# Insertion: Theory: O(1), but approaches O(n^2) in practice due to the sheer number of entries being inserted by property of rehashing.
+# Insertion: Theory: O(1), but approaches O(n) in practice due to the sheer number of entries being inserted by property of rehashing.
 # Sorting: Theory: O(nlogn) but may approach O(n^2) in practice due to quicksort's random choice of pivots.
 
 # I will be implementing in C, with a potential tree (AVL/ balanced) structure.
 # Insertion: Theory: 2*O(nlogn) guaranteed performance for insertion.
 # Sorting: Theory: O(n) traversal of 2nd tree.
+
+# Currently, the program takes approx 1 hour to process 200 000 000 basic strings, will do some heavier testing and potential multithreading of the CPU to produce better results.
