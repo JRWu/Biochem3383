@@ -20,6 +20,7 @@
 
 
 // Function Prototypes (private functions)
+avlNode* tallerChild(avlNode* n);
 int computeHeight(avlNode node);
 void MakeLeftChild (avlNode* a, avlNode* b);
 void MakeRightChild (avlNode* a, avlNode* b);
@@ -64,15 +65,28 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         
         if (comparator < 0) // New seq is larger, insert right
         {
-            (*tree)->right_child = avlTree_insert(&(*tree)->right_child,s,id);
-            ((*tree)->right_child)->parent = *tree; // Set parent of new node
+            avlTree_insert(&(*tree)->right_child,s,id);
+            
+            //insert at external needed
+            
+            // If Not Null
+            
+            if ((*tree)->right_child != NULL)
+            {
+                ((*tree)->right_child)->parent = *tree; // Set parent of new node
+            }
+                                            
+            
             (*tree)->height = computeHeight(**tree);
             temp = (*tree)->right_child; // CHANGED
         }
         else if (comparator > 0) // New seq is less, insert left
         {
-            (*tree)->left_child = avlTree_insert(&(*tree)->left_child,s,id);
-            ((*tree)->left_child)->parent = *tree; // Set parent of new node
+            avlTree_insert(&(*tree)->left_child,s,id);
+            if ((*tree)->left_child != NULL)
+            {
+                ((*tree)->left_child)->parent = *tree; // Set parent of new node
+            }
             (*tree)->height = computeHeight(**tree);
             temp = (*tree)->left_child; // CHANGED
         }
@@ -99,9 +113,18 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
             // Write function to implement the height checking
             if (balanced(temp) != true)
             {
-                if (temp != NULL)
+                
+//                temp = triNodeRestructure(*tallerChild(tallerChild(*temp)), tallerChild(*temp), *temp);
+//                temp = triNodeRestructure(temp, tallerChild(*temp), temp);
+                temp = triNodeRestructure(tallerChild(tallerChild(temp)), tallerChild(temp), temp);
+                temp->height = computeHeight(*temp);
+                if (temp->left_child != NULL)
                 {
-                    printf("temp values %s\n", temp->seq);
+                    temp->left_child->height = computeHeight(*temp->left_child);
+                }
+                if (temp->right_child != NULL)
+                {
+                    temp->right_child->height = computeHeight(*temp->right_child);
                 }
                 
                 break;
@@ -183,9 +206,9 @@ int computeHeight(avlNode node)
     int left = 0;
     int right = 0;
 
-    if (external(node)) // External nodes count as 0
+//    if (external(node)) // External nodes count as 0
     {
-        return 1;
+  //      return 1;
     }
     
     if (node.left_child != NULL) // find left subtree height
@@ -305,14 +328,14 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     
     // Need to support free operations here because restructure may be called "n" times
-    free(x);
-    free(y);
-    free(z);
-    free(a);
-    free(b);
-    free(c);
+//    free(x);
+//    free(y);
+//    free(z);
+//    free(a);
+//    free(b);
+//    free(c);
     
-    return NULL;
+    return b;
 }
 
 
@@ -321,7 +344,7 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
  * If even heights are returned, it will return subtree based on parental origin
  * @n is the node being compared
  * @return higher subtree given a node
- */
+ *
 avlNode tallerChild(avlNode n)
 {
     if ((n.left_child->height) > (n.right_child->height))
@@ -344,19 +367,72 @@ avlNode tallerChild(avlNode n)
             return *n.right_child;
         }
     }
+}// */
+
+
+/**
+ * tallerChild takes a node and returns the taller of the 2 subtrees
+ * If even heights are returned, it will return subtree based on parental origin
+ * @n is the node being compared
+ * @return higher subtree given a node
+ */
+avlNode* tallerChild(avlNode* n)
+{
+    int left = 0;
+    int right = 0;
+    
+    if (n->left_child != NULL)
+    {
+        left = n->left_child->height;
+    }
+    if (n->right_child != NULL)
+    {
+        right = n->right_child->height;
+    }
+    
+    if (left > right)
+    {
+        return n->left_child;
+    }
+    else if(left < right)
+    {
+        return n->right_child;
+    }
+    
+    else
+    {
+        int comparator = strcmp (n->seq, n->parent->seq);
+        if (comparator < 0)
+        {
+            return n->left_child;
+        }
+        else
+        {
+            return n->right_child;
+        }
+    }
+    
 }
+
+
 
 
 void MakeLeftChild (avlNode* a, avlNode* b)
 {
     a->left_child = b;
-    b->parent = a;
+    if (b!=NULL)
+    {
+        b->parent = a;
+    }
 }
 
 void MakeRightChild (avlNode* a, avlNode* b)
 {
     a->right_child = b;
-    b->parent = a;
+    if (b!= NULL)
+    {
+        b->parent = a;
+    }
 }
 
 /*
