@@ -52,7 +52,8 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         (*tree) -> identifier = id; // Set id of the node
         
         (*tree)->height = computeHeight(**tree);
-        return *tree;
+        return *tree; // reference to node that was inserted
+        // NOTE, DON'T HAVE TO CALL REBALANCE HERE, AS THIS IS ROOT
     }
     else
     {
@@ -78,9 +79,28 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
             (*tree)->count ++; // Increment seq counter
             return (*tree);
         }
+        
+        //^ All 3 cases where something was inserted
+        // Must check for height imbalance here, and then rebalance
+        //
+        
     }
-    return *tree;
+    return *tree; // reference to node that was inserted
 }
+
+
+
+
+
+
+// Note: Rebalance operations need to be called after every insertion
+// Verify after every insertion that the node IS, or could be unbalanced
+// ADD LATER
+
+
+
+
+
 
 
 /**
@@ -143,6 +163,14 @@ int computeHeight(avlNode node)
     return (1 + max(left,right)); // Return max of left and right + 1 for current
 }
 
+
+/**
+ * triNodeRestructure takes an unbalanced node, its child, and its grandchild
+ * compares the height differences of the nodes and restructures accordingly
+ * Used to guarantee a tree with no height difference >1 
+ * @grandchild, @child, @unbalanced are nodes involved in restructuring
+ * @return the pointer to a balanced node
+ */
 avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalanced)
 {
     avlNode* x = malloc (sizeof(avlNode));
@@ -255,7 +283,7 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
  * tallerChild takes a node and returns the taller of the 2 subtrees
  * If even heights are returned, it will return subtree based on parental origin
  * @n is the node being compared
- * @return higher subtree given a node 
+ * @return higher subtree given a node
  */
 avlNode tallerChild(avlNode n)
 {
