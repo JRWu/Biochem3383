@@ -23,6 +23,7 @@
 int computeHeight(avlNode node);
 void MakeLeftChild (avlNode* a, avlNode* b);
 void MakeRightChild (avlNode* a, avlNode* b);
+bool balanced (avlNode * node);
 
 /**
  * avlTree_init allocates necessary memory for a pointer to the first element in a tree
@@ -58,18 +59,22 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
     else
     {
         int comparator = strcmp((*tree)->seq, s);
+        avlNode* temp; // Temporary container
+
+        
         if (comparator < 0) // New seq is larger, insert right
         {
             (*tree)->right_child = avlTree_insert(&(*tree)->right_child,s,id);
             ((*tree)->right_child)->parent = *tree; // Set parent of new node
-            (*tree)->height = computeHeight(**tree); //ERROR
+            (*tree)->height = computeHeight(**tree);
+            temp = (*tree)->right_child; // CHANGED
         }
         else if (comparator > 0) // New seq is less, insert left
         {
             (*tree)->left_child = avlTree_insert(&(*tree)->left_child,s,id);
             ((*tree)->left_child)->parent = *tree; // Set parent of new node
-            (*tree)->height = computeHeight(**tree); //ERROR
-
+            (*tree)->height = computeHeight(**tree);
+            temp = (*tree)->left_child; // CHANGED
         }
         else // Strings equivalent, increment counter for seq
         {
@@ -77,12 +82,44 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
             // Add code to append identifiers later*
             
             (*tree)->count ++; // Increment seq counter
+            temp = (*tree); // CHANGED
             return (*tree);
         }
         
+        
         //^ All 3 cases where something was inserted
         // Must check for height imbalance here, and then rebalance
-        //
+        // NEED HOLDER FOR THE NODE INSERTED
+
+        while (temp != NULL)
+        {
+            temp->height = computeHeight(*temp); // Reset height of entry
+            
+            // Memory leak, need to fix this here
+            // Write function to implement the height checking
+            if (balanced(temp) != true)
+            {
+                if (temp != NULL)
+                {
+                    printf("temp values %s\n", temp->seq);
+                }
+                
+                break;
+            }// */
+            
+
+
+            temp = temp->parent;
+        }
+        printf("\n");
+        
+        // Maybe need a do-while loop here^
+        
+        
+        
+        
+        
+        
         
     }
     return *tree; // reference to node that was inserted
@@ -322,4 +359,29 @@ void MakeRightChild (avlNode* a, avlNode* b)
     b->parent = a;
 }
 
+/*
+ * balanced takes a node and returns if its subtrees differ by 2
+ */
+bool balanced (avlNode * node)
+{
+    int left = 0;
+    int right = 0;
 
+    if (node->left_child != NULL)
+    {
+        left = node->left_child->height;
+    }
+    if (node->right_child != NULL)
+    {
+        right = node->right_child->height;
+    }
+
+    if ( (abs(left - right)) > 1) // If height differs by > 1
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
