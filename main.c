@@ -26,45 +26,98 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "avlTree.h"
+#include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
     
-    /*
-     *MISC VALUES FOR TESTING
-     */
-    avlTree testTree;
-    testTree = avlTree_init();
+//    avlTree seq;          // Store original sequences
+//    seq = avlTree_init();
     
-    char* sequence = "ATGC";
-    char* identifier = "50:43";
-    avlTree_insert(testTree, sequence, identifier);
+    // Call file input here
     
-    sequence = "ATGA";
-    identifier = "51:43";
-    avlTree_insert(testTree, sequence, identifier);
-
-    sequence = "ATGG";
-    identifier = "52:43";
-    avlTree_insert(testTree, sequence, identifier);
-    
-    sequence = "ATGT";
-    identifier = "54:43";
-    avlTree_insert(testTree, sequence, identifier);
+    // Call tokenizer here
     
     
-    sequence = "ATGT"; // Test for double insertion
-    identifier = "54:43";
-    avlTree_insert(testTree, sequence, identifier);
+    // Insert values afterwards
+    char* sequence;
+    char* identifier;
+//    avlTree_insert(seq, sequence, identifier);
+//    Call reset root
     
     
-    /*
-     *MISC VALUES FOR TESTING
-     */
     
-    inOrder_traversal(testTree); // Test for traversing tree
-
-    printf("Hello, World!\n");
+    
+    char* tabs = "\t"; // To append to the end of identifiers
+    printf("TabTest: x,%sa  \n\n",tabs); // DEBUG PURPOSES ONLY
+    
+    
+    
+    // DEBUG PURPOSES TO MEASURE PERFORMANCE
+    clock_t begin, end;
+    double time_spent;
+    begin = clock();
+    // DEBUG PURPOSES TO MEASURE PERFORMANCE
+    
+    
+    
+    
+    // Read in file
+    FILE *fp; // Pointer to File
+    char c;
+    fp = fopen ("input.txt", "r");
+    
+    if (fp == NULL)
+    {
+        printf ("Error: Unable to read from file. \n");
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        printf("File Contents:\n\n");
+        int i = 0;
+        while ( (c = fgetc(fp)) != EOF) // Iterate through whole file
+        {
+            if (c == '\t')
+            {
+                i++;
+            }
+            
+            if (i == 0) // Equivalent to the ID
+            {
+                printf("%c",c);
+            }
+            
+            if (i == 3) // Equivalent to split /\t/ (line 27)
+            {
+                // Add code to put into sequence
+                printf("%c",c);
+            }
+            
+            
+            
+            if (c == '\n')
+            {
+                printf("\n# tabs before newline = %d\n",i);
+                i = 0;
+            }
+        }
+    }
+    fclose(fp);
+    
+    
+    
+    end = clock();
+    time_spent =   (double)(end-begin);
+    
+    printf("\nTime: %fms \n", time_spent);
+    
+    
+    
+    
+    
+    printf("\n\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
     return 0;
 }
 
