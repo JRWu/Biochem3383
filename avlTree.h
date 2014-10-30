@@ -17,6 +17,7 @@
 #define __group_gt1__avlTree__
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define MAX_SEQ_LENGTH 300
 #ifndef max
@@ -45,13 +46,15 @@ typedef avlNode** avlTree; // Represents a pointer to an avlTree
 #endif /* defined(__group_gt1__avlTree__) */
 
 
-
 // Function Prototypes
 avlTree avlTree_init(void);
 avlNode* avlTree_insert(avlTree, char* seq, char* identifier);
 int node_count(avlTree, char*seq);
 void inOrder_traversal(avlTree);
 bool external(avlNode);
+avlNode* triNodeRestructure(avlNode *grandchild,avlNode *child, avlNode *unbalanced);
+void resetRoot (avlTree t);
+char* tokenizer(char* string);
 
 
 // Deletion & Memory Free not supported because not necessary to sort

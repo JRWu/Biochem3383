@@ -38,6 +38,7 @@ avlTree avlTree_init(void)
     return tree;
 }
 
+
 /**
  * avlTree_insert takes a sequence and identifier, and inserts it into a tree
  * @s represents the sequence to be inserted
@@ -60,35 +61,30 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
     else
     {
         int comparator = strcmp((*tree)->seq, s);
-        avlNode* temp; // Temporary container
+        avlNode* temp; // Node to check for imbalance
 
-        
-        if (comparator < 0) // New seq is larger, insert right
+        if (comparator < 0) // New seq is lexiographically greater, insert right
         {
             avlTree_insert(&(*tree)->right_child,s,id);
             
-            //insert at external needed
-            
-            // If Not Null
-            
-            if ((*tree)->right_child != NULL)
+            if ((*tree)->right_child != NULL) // Set parent of right if not null
             {
                 ((*tree)->right_child)->parent = *tree; // Set parent of new node
             }
-                                            
             
             (*tree)->height = computeHeight(**tree);
-            temp = (*tree)->right_child; // CHANGED
+            temp = (*tree)->right_child; // Rebalance purposes
         }
-        else if (comparator > 0) // New seq is less, insert left
+        else if (comparator > 0) // New seq is lexiographically less, insert left
         {
             avlTree_insert(&(*tree)->left_child,s,id);
-            if ((*tree)->left_child != NULL)
+            
+            if ((*tree)->left_child != NULL) // Set parent of left if not null
             {
                 ((*tree)->left_child)->parent = *tree; // Set parent of new node
             }
             (*tree)->height = computeHeight(**tree);
-            temp = (*tree)->left_child; // CHANGED
+            temp = (*tree)->left_child; // Rebalance Purposes
         }
         else // Strings equivalent, increment counter for seq
         {
@@ -96,10 +92,9 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
             // Add code to append identifiers later*
             
             (*tree)->count ++; // Increment seq counter
-            temp = (*tree); // CHANGED
+            temp = (*tree); // Rebalnce purposes
             return (*tree);
         }
-        
         
         //^ All 3 cases where something was inserted
         // Must check for height imbalance here, and then rebalance
@@ -109,14 +104,11 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
         {
             temp->height = computeHeight(*temp); // Reset height of entry
             
-            // Memory leak, need to fix this here
-            // Write function to implement the height checking
-            if (balanced(temp) != true)
+            if (balanced(temp) != true) // If tree umbalanced at this node
             {
+                temp = triNodeRestructure(tallerChild(tallerChild(temp)), tallerChild(temp),temp); // Rebalance
                 
-//                temp = triNodeRestructure(*tallerChild(tallerChild(*temp)), tallerChild(*temp), *temp);
-//                temp = triNodeRestructure(temp, tallerChild(*temp), temp);
-                temp = triNodeRestructure(tallerChild(tallerChild(temp)), tallerChild(temp), temp);
+                // Reset height of all nodes involved
                 temp->height = computeHeight(*temp);
                 if (temp->left_child != NULL)
                 {
@@ -126,42 +118,17 @@ avlNode* avlTree_insert(avlTree tree, char* s, char* id)
                 {
                     temp->right_child->height = computeHeight(*temp->right_child);
                 }
-                
-                break;
-            }// */
-            
 
+                break; // Tree rebalanced after 1 operation
+            }
 
-            temp = temp->parent;
+            temp = temp->parent; // Traverse up to check for more imbalance
         }
-        printf("\n");
-        
-        // Maybe need a do-while loop here^
-        
-        
-        
-        
-        
-        
-        
+        printf("\n"); // DEBUG PURPOSES REMOVE LATER
     }
+    
     return *tree; // reference to node that was inserted
 }
-
-
-
-
-
-
-// Note: Rebalance operations need to be called after every insertion
-// Verify after every insertion that the node IS, or could be unbalanced
-// ADD LATER
-
-
-
-
-
-
 
 /**
  * inOrder_traversal walks the tree from smallest to largest element
@@ -281,40 +248,31 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     if (z->parent == NULL ) // Reached root
     {
+        // Need to set the tree to point to new root
+        
         // Set left and right of b as z's left and right
         // set left parent and right parent of z as b
         // Remove parent of b
-        
         z->left_child->parent = b;
         z->right_child->parent = b;
-        
-        b->left_child = z->left_child;
-        b->right_child = z ->right_child;
-        
         b->parent = NULL;
-
+        
     }
     else // Replacing Z
     {
         if (z->parent->left_child == z)
         {
             MakeLeftChild(z->parent, b);
-//            z->parent->left_child = b;
-//            b->parent = z;
         }
         else
         {
             MakeRightChild(z->parent,b);
-//            z->parent->right_child = b;
-//            b->parent = z;
         }
     }
     
     if (b->left_child != x && b->left_child != y && b->left_child != z)
     {
         MakeRightChild(a, b->left_child);
-//        a->right_child = b->left_child;
-//        b->right_child->parent = a;
     }
     
     if (b->right_child != x && b->right_child != y && b->right_child != z)
@@ -324,8 +282,6 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     MakeLeftChild(b,a);
     MakeRightChild(b,c);
-    
-    
     
     // Need to support free operations here because restructure may be called "n" times
 //    free(x);
@@ -337,37 +293,6 @@ avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalan
     
     return b;
 }
-
-
-/**
- * tallerChild takes a node and returns the taller of the 2 subtrees
- * If even heights are returned, it will return subtree based on parental origin
- * @n is the node being compared
- * @return higher subtree given a node
- *
-avlNode tallerChild(avlNode n)
-{
-    if ((n.left_child->height) > (n.right_child->height))
-    {
-        return *n.left_child;
-    }
-    else if ((n.left_child->height) < (n.right_child->height))
-    {
-        return *n.right_child;
-    }
-    else
-    {
-        int comparator = strcmp (n.seq, n.parent->seq);
-        if (comparator < 0)
-        {
-            return *n.left_child;
-        }
-        else
-        {
-            return *n.right_child;
-        }
-    }
-}// */
 
 
 /**
@@ -416,7 +341,11 @@ avlNode* tallerChild(avlNode* n)
 
 
 
-
+/**
+ * MakeLeftChild takes a node, and makes it the left child of another
+ * @a is the parent
+ * @b becomes left child of a
+ */
 void MakeLeftChild (avlNode* a, avlNode* b)
 {
     a->left_child = b;
@@ -426,6 +355,11 @@ void MakeLeftChild (avlNode* a, avlNode* b)
     }
 }
 
+/**
+ * MakeRightChild takes a node, and makes it the right child of another
+ * @a is the parent
+ * @b becomes right child of a
+ */
 void MakeRightChild (avlNode* a, avlNode* b)
 {
     a->right_child = b;
@@ -437,6 +371,8 @@ void MakeRightChild (avlNode* a, avlNode* b)
 
 /*
  * balanced takes a node and returns if its subtrees differ by 2
+ * @node is the node being compared
+ * @return true if the height of subtrees is not 1, false otherwise
  */
 bool balanced (avlNode * node)
 {
@@ -461,3 +397,36 @@ bool balanced (avlNode * node)
         return true;
     }
 }
+
+
+/**
+ * resetRoot resets the pointer to the root node after rebalance
+ * @t is the tree being reset
+ */
+void resetRoot (avlTree t)
+{
+    if ( (*t)-> parent == NULL)
+    {
+        // Do nothing, root is correct
+    }
+    else
+    {
+        while ( (*t)->parent != NULL) // Iterate up till the root
+        {
+            (*t) = (*t)->parent;
+        }
+    }
+}
+
+
+/**
+ * tokenizer takes input and breaks it up by tabs and newlines
+ * takes a string before newline, parses it on tabs, and sends it to be inserted
+ * @file is the file to be read
+ */
+char* tokenizer(char* string)
+{
+    // Split on delimiters
+    return NULL;
+}
+
