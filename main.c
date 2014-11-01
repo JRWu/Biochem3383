@@ -31,26 +31,18 @@
 #include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
-    
-//    avlTree seq;          // Store original sequences
-//    seq = avlTree_init();
-    
     // Call file input here
-    
     // Call tokenizer here
     
-    
     // Insert values afterwards
-    char* sequence;
-    char* identifier;
 //    avlTree_insert(seq, sequence, identifier);
 //    Call reset root
     
     
     
     
-    char* tabs = "\t"; // To append to the end of identifiers
-    printf("TabTest: x,%sa  \n\n",tabs); // DEBUG PURPOSES ONLY
+//    char* tabs = "\t"; // To append to the end of identifiers
+//    printf("TabTest: x,%sa  \n\n",tabs); // DEBUG PURPOSES ONLY
     
     
     
@@ -60,61 +52,82 @@ int main(int argc, const char * argv[]) {
     begin = clock();
     // DEBUG PURPOSES TO MEASURE PERFORMANCE
     
+    int inputs = 0;
+    
+
     
     
-    
-    // Read in file
-    FILE *fp; // Pointer to File
-    char c;
-    fp = fopen ("input.txt", "r");
+    char buffer[2048];
+    FILE *fp = fopen("rekeyed_tab.txt", "r");
+    avlTree seq;          // Store original sequences
+    seq = avlTree_init();
     
     if (fp == NULL)
     {
-        printf ("Error: Unable to read from file. \n");
-        exit(EXIT_FAILURE);
     }
     else
     {
-        printf("File Contents:\n\n");
-        int i = 0;
-        while ( (c = fgetc(fp)) != EOF) // Iterate through whole file
+        char a[300]="";
+        char b[300]="";
+        char c[300]="";
+        char d[300]="";
+        char e[300]="";
+        char f[300]="";
+
+        
+        while ( (fgets(buffer,2048, fp)) != NULL) // LOOP THROUGH FILE
         {
-            if (c == '\t')
+            char* sequence = malloc(sizeof(d));
+            char* identifier = malloc(sizeof(a));
+            // LOOP THROUGH THE LINES
+            while (sscanf(buffer, " %s  %s %s %s %s %s ", a,b,c,d,e,f) == 6)
             {
-                i++;
+                
+//                printf("%s\n\n", a); // Represents gid
+//                printf("%s\n\n", b);
+//                printf("%s\n\n", c);
+//                printf("%s\n\n", d); // Represents the value we want
+//                printf("%s\n\n", e);
+//                printf("%s\n\n", f);
+                strncpy(sequence,d,300);
+                strncpy(identifier,a,300);
+
+                inputs ++;
+                break;
             }
+            // D is not being reset, the act of sscanf in- will change it
             
-            if (i == 0) // Equivalent to the ID
-            {
-                printf("%c",c);
-            }
+            avlTree_insert(seq, sequence, identifier);
+            resetRoot(seq);
             
-            if (i == 3) // Equivalent to split /\t/ (line 27)
-            {
-                // Add code to put into sequence
-                printf("%c",c);
-            }
+//            free(sequence);
+//            free (identifier);
             
-            
-            
-            if (c == '\n')
-            {
-                printf("\n# tabs before newline = %d\n",i);
-                i = 0;
-            }
         }
+        int count =  totalNodes(seq);
+        printf("Total nodes: %d", count);
+        
     }
     fclose(fp);
     
     
+
+    
+    
     
     end = clock();
-    time_spent =   (double)(end-begin);
+    time_spent =   ((double)(end-begin)*1000)/CLOCKS_PER_SEC;
     
+    printf("\nInputs: %d",inputs);
     printf("\nTime: %fms \n", time_spent);
     
     
-    
+    FILE *output;
+    output = fopen("rekeyed_tab_time.txt","a");
+    fprintf(output, "Inputs: %d \n",inputs);
+    fprintf(output, "Time: %fms \n", time_spent);
+    fprintf(output, "\n\n");
+    fclose(output);
     
     
     printf("\n\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
