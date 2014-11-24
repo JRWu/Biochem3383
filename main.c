@@ -23,28 +23,38 @@
  * frees any memory that this program has reserved
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "avlTree.h"
+
 #include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
-    
+    FILE* fp;
+    char* dir = malloc(MAX_SEQ_LENGTH*sizeof(char));
     char* directoryIn = (char*) argv[1];
     char* directoryOut = (char*) argv[2];
     
     // Handle arguments to program
     source* parameters = params_init(directoryIn, directoryOut);
+    DIR* dIn; // Source Directory
+    dIn = opendir(parameters->dirIn);
+    if (dIn == NULL)
+    {
+        fp = fopen(parameters->fileIn, "r");
+    }
+    else
+    {
+        getcwd(dir,MAX_SEQ_LENGTH);
+        printf("dir: %s\n\n",dir); // DIR now contains current working director
+        chdir(parameters->dirIn); // Change directory to directory with file
+        fp = fopen(parameters->fileIn, "r");
+    }
+    printf("Directory Name: %s|\n",parameters->dirIn);
     
-    printf("In: %s\n",parameters->fileIn); // DEBUG
-    printf("Out: %s\n",parameters->fileOut); // DEBUG
+    // ADD CODE TO SAVE CURRENT DIRECTORY BEFORE chdir(parameters->dirIN) is called
+    chdir(dir); // Go up a directory (CHANGE TO SAVE CURRENT LATER)
     
-    
-    
-    free(parameters); // Done with parameters
-    exit(EXIT_SUCCESS);
-
     
     /*DETERMINE RUNTIME*/
     clock_t begin, end;
@@ -52,50 +62,42 @@ int main(int argc, const char * argv[]) {
     begin = clock();
     /*DETERMINE RUNTIME*/
     
-    int inputs = 0;
-    char buffer[2048];
-    FILE *fp = fopen(parameters->fileIn, "r");
-    // Split the string on delimiters here
+    int inputs = 0; // Count total inputs
+    int count = 0;  // Count unique inputs
+    bool reset = true;
+    char buffer[MAX_BUFFER_LEN];
     
-    avlTree seq;          // Store original sequences
+    avlTree seq;    // Data structure to store sequences
     seq = avlTree_init();
-    int count = 0;
     
     if (fp == NULL)
     {
-        perror("ERROR: Could not read from file.\n");
+        perror("ERROR: Could not read from file");
         exit(EXIT_FAILURE);
     }
     else
     {
-        char a[100]="";
-        char b[100]="";
-        char c[100]="";
-        char d[MAX_SEQ_LENGTH]="";
-        char e[100]="";
-        char f[100]="";
+        char id[MAX_ID_LENGTH]="";          // Sequence identifier
+        char misc[MAX_ID_LENGTH]="";
+        char primer[MAX_ID_LENGTH]="";
+        char id_sequence[MAX_SEQ_LENGTH]=""; // Sequence l[3] (fix later)
         char flag = 's';
         
+        avlNode* insert = malloc (sizeof(avlNode));
+        
+        // Read file into buffer for parsing individual lines
         while ((fgets(buffer,1024, fp)) != NULL) // LOOP THROUGH FILE
         {
-            avlNode* insert = malloc (sizeof(avlNode)); // AD
             
-            // Parse individual Newlines
-            while (sscanf(buffer, " %s %s %s %s %s %s ", a,b,c,d,e,f) == 6)
+            // Parse individual lines from file
+            // Accepts whitespace-separated lines or tabbed lines
+            while (sscanf(buffer, " %s %s %s %s %s %s ", id,misc,primer,id_sequence,primer,misc) == 6)
             {
-                //                printf("%s\n\n", a); // Represents gid
-                //                printf("%s\n\n", b);
-                //                printf("%s\n\n", c);
-                //                printf("%s\n\n", d); // Represents the value we want
-                //                printf("%s\n\n", e);
-                //                printf("%s\n\n", f);
-                
-                
-                char* sequence = malloc(strlen(d)+1); // + 1 byte for null term
-                char* identifier = malloc(strlen(a)+1); // + 1 byte for null term
-                strncpy(sequence,d,strlen(d));   // Copy buffer to mem
-                strncpy(identifier,a,strlen(a)); // Coppy id to mem
-                
+                char* sequence = malloc(strlen(id_sequence)+1); // + 1 byte for null term
+                char* identifier = malloc(strlen(id)+1); // + 1 byte for null term
+                strncpy(sequence,id_sequence,strlen(id_sequence));   // Copy buffer to mem
+                strncpy(identifier,id,strlen(id)); // Coppy id to mem
+                //printf("identifier: %s(main)\n",identifier);
                 /*
                  NOTE: ID needs to be kept till read into groups file
                  NOTE: SEQ can be discarded if another identical one is encountered
@@ -107,40 +109,33 @@ int main(int argc, const char * argv[]) {
                 break;                           // Inserted file info
             }
             
-            avlTree_insert(seq, insert, flag);
-            resetRoot(seq);
+            avlTree_insert(seq, insert, flag);  // Add sequence to data structure
+            if (reset)
+            {
+                resetRoot(seq); // Can fix to remove later (> performance)
+                reset = false; // Comparisons are cheaper than traversals
+            }
         }
-        count =  totalNodes(seq);
+        
+        count =  totalNodes(seq); // Count = number of UNIQUE entries
         printf("Number of unique entries: %d\n", count);
+        free(insert);
     }
     fclose(fp);
     
-    //    inOrder_traversal(seq);   // Debug info later
-    
     int* index = malloc(sizeof(int)); // Used to set array indices
     *index = 0;
-    avlNode* arr[count];
-    
+    avlNode* arr[count];    // Create array of pointers to nodes
     populateArray(seq, arr, index);
-    // Build input array here, pass reference into the program
-    // During recurisve traversal increment the index and insertt he node
-    // Call qsort on the array which stores the data
     
-    
-    // INSERT FLAG FOR ORDERING FILE HERE
-    qsort((void*)&arr, count, sizeof(void*), &comparator); // sort array
-    //qsort((void*)&arr, count, sizeof(void*), &reverseComparator);
-    /*--DEBUGGING PURPOSES REMOVE LATER--*/
-    
-    arrWrite(arr, count, directoryOut);
+    qsort((void*)&arr, count, sizeof(void*), &comparator); // Sort on gcount
+    arrWrite(arr, count, parameters);   // File write
     
     end = clock();
     time_spent =   ((double)(end-begin)*1000)/CLOCKS_PER_SEC;
     
     printf("\nNumber of entries: %d",inputs);
     printf("\nTime: %fms \n", time_spent);
-    
-    
     
     
     /*USE THIS TO OBTAIN RUNTIME DATA FOR LABBOOK*/
@@ -150,7 +145,8 @@ int main(int argc, const char * argv[]) {
     //    fprintf(output, "Time: %fms \n", time_spent);
     //    fprintf(output, "\n\n");
     //    fclose(output);
+    free(parameters);
     free(index);
-    printf("\n\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
+    printf("\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
     exit(EXIT_SUCCESS);
 }

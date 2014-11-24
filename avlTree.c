@@ -63,31 +63,46 @@ source* params_init(char* arg1, char* arg2)
         exit (EXIT_FAILURE);
     }
     source* params = malloc(sizeof(source));
+    int count;
     
     char argument1[strlen(arg1)]; // Hold copy- strtok consumes original
     char argument2[strlen(arg2)]; // Hold copy- strtok consumes original
-    
     memcpy(argument1, arg1, strlen(arg1));
     memcpy(argument2, arg2, strlen(arg2));
     
+    count = (int)strlen(arg1);
     char* x = strtok(arg1,"/");
     while (x != NULL)
     {
         params->fileIn = x;
         x = strtok(NULL,"/");
     }
+    count = count - (int)strlen(params->fileIn);
+    params->dirIn = malloc(count*sizeof(char));
+    memcpy(params->dirIn, argument1, count);
+    count = (int)strlen(arg2);
     char* y = strtok(arg2,"/");
     while (y != NULL)
     {
         params->fileOut = y;
         y = strtok(NULL,"/");
     }
-    printf("In: %s\n",argument1); // Debug Info
-    printf("Out: %s\n",argument2);// Debug Info
-    
-    
+    count = count - (int)strlen(params->fileOut);
+    params->dirOut = malloc(count*sizeof(char));
+    memcpy(params->dirOut, argument2, count);
     
     return params;
+}
+
+/*
+ * free_params frees allocated memory for arguments for group_gt1
+ * @p is the pointer to the parameters
+ */
+void free_params(source* p)
+{
+    free (p->dirIn);
+    free (p->dirOut);
+    free(p);
 }
 
 
@@ -106,6 +121,8 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
         (*node)->identifier = insert->identifier;
         (*node)->seq = insert->seq;
         (*node)->height = 0;
+        (*node)->nId = setFirst(insert->identifier);
+//        printf("identifier: %s(insert_function)\n",(*node)->nId->identifier);
     }
     else // Root is not null
     {
@@ -136,10 +153,11 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
             //            (*node)->height = computeHeight(*node);   // Bottleneck...
             //            (*node)->height = resetHeight(*node);
         }
-        else
+        else // same sequence
         {
             //printf("c: %d\n",(*node)->gcount);
             (*node)->gcount++;
+            (*node)->nId = setNext(insert->identifier, (*node)->nId);
             //free(insert->seq);
             //free(insert->identifier);
             return (*node);
@@ -348,36 +366,6 @@ void traverseInsert(avlTree unsorted,avlTree sorted)
 }
 
 
-
-
-//void populateArray (avlNode* arr, avlTree sorted)
-//{
-//    int i = 0;
-//    arr[i] = **sorted;
-//}
-
-/*
- // As you traverse the tree, increment the node
- int populateArray (avlTree sorted, avlNode arr[])
- {
- int index = 0; // Index to access the array
- 
- if ( (*sorted) != NULL) // Haven't reached external
- {
- index = index + populateArray(  &(*sorted)->left_child, arr);
- 
- // Do insertion into array
- arr[index] = *((*sorted));
- 
- index = index + populateArray( &(*sorted)->right_child, arr);
- return index;
- }
- else
- {
- return - 1;
- }
- }//*/
-
 int populateArray(avlTree sorted, avlNode* arr[], int* index)
 {
     
@@ -464,13 +452,24 @@ int reverseComparator (const void* one, const void* two)
  * @arr[] is the array being read from
  * @count is the number of elements in the array
  */
-void arrWrite(avlNode* arr[], int count, char* fileName)
+void arrWrite(avlNode* arr[], int count, source* parameters)
 {
-    FILE *fp;
-    fp = fopen ("groups.txt", "w");
+    FILE* fp;
+    DIR* dOut;
+    dOut = opendir(parameters->dirOut);
+    if (dOut == NULL)
+    {
+        fp = fopen(parameters->fileOut, "w");
+    }
+    else
+    {
+        chdir(parameters->dirOut); // FIX LATEr, NOT WORKING
+        fp = fopen(parameters->fileOut, "w");
+    }
+    
     if (fp == NULL)
     {
-        perror("ERROR: Unable to write to file.\n");
+        perror("ERROR: Unable to write to file");
         exit(EXIT_FAILURE);
     }
     else
@@ -489,6 +488,7 @@ void arrWrite(avlNode* arr[], int count, char* fileName)
  */
 void iterateWrite(avlNode* arr[], FILE *fp, int count)
 {
+    FILE* fwp = fopen("reads_in_groups_c.txt", "w");
     // MUST ADD HADNLING FOR ARRAY
     int index; // Index of the array
     for (index = 0; index < count; index ++)
@@ -497,10 +497,25 @@ void iterateWrite(avlNode* arr[], FILE *fp, int count)
         {
             fprintf(fp, ">lcl|%d|num|%d|\t", index, (*(arr[index])).gcount);
             fprintf(fp, "%s\n", (*(arr[index])).seq);
+            
+
+            
+            fprintf(fwp, "%d",index);
+            while ((*arr[index]).nId != NULL)
+            {
+//                printf("    id: %s\n", (*arr[index]).nId->identifier);
+                fprintf(fwp,"%s",(*arr[index]).nId->identifier);
+                (*arr[index]).nId = (*arr[index]).nId->next;
+            }
+            fprintf(fwp, "\n");
+            
+            
         }
         // Write code to free the pointers to data and seq as well
         free((arr[index])); // Free the data pointed to in array
     }
+    
+    fclose(fwp);
 }
 
 
@@ -514,7 +529,7 @@ void fileWrite(avlTree sorted)
     fp = fopen ("groups_from_c.txt","w");
     if (fp == NULL)
     {
-        printf("Error, unable to write to file.\n");
+        perror("ERROR: Could not write to file");
     }
     else
     {
@@ -563,11 +578,6 @@ int totalNodes(avlTree tree)
     }
     return 0;
 }
-
-
-
-
-
 
 
 /**
@@ -706,15 +716,42 @@ int intComparator(avlNode* one, avlNode* two)
 }
 
 
-nextId* setNext(char* identifier)
+/*
+ * setNext adds and identifier to the head of the "pseudo-linked-list"
+ * @identifier is the ID being added for a sequence
+ * @head is the CURRENT head of the linked list
+ * @return the head of the list
+ */
+nextId* setNext(char* identifier, nextId* head)
 {
-    nextId* next = malloc(sizeof(nextId)); // Set memory
-    char* id = identifier;
-    next->next = NULL;
+    nextId* next = malloc(sizeof(nextId)); // Create new node
+//    next->identifier = malloc(sizeof(strlen(identifier)));
+    next->identifier = identifier; // Shouldn't need to malloc because just pointing to locations allocated by sequences**
     
+    next->next = head;
     return next;
+    // Can loop until null found
+}
+
+nextId* setFirst(char* identifier)
+{
+    nextId* first = malloc(sizeof(nextId));
+    first->identifier= identifier;
+//    first->identifier = malloc(strlen(identifier));
+    
+    first->next = malloc(sizeof(NULL));
+    first->next = NULL;
+    
+    return first;
 }
 
 
+/*
+ * Get id that's not unique **
+ * Invoke program, pass CURRENT HEAD
+ * Create new node, set the ID
+ * Make current head point to new head
+ * return new head
+ */
 
 

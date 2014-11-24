@@ -19,12 +19,19 @@
 #include <stdbool.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
+
 
 #define MAX_SEQ_LENGTH 500
+#define MAX_ID_LENGTH 100
+#define MAX_BUFFER_LEN 2048
 #ifndef max
 #define max( a, b ) ( ((a) > (b)) ? (a) : (b) ) // Function to determine max of 2 integers
 #endif
 
+/*
+ * source represents directory + filename
+ */
 typedef struct source
 {
     char* dirIn;    // Input Directory
@@ -51,8 +58,8 @@ typedef struct node
     int height; // Represents height of item in tree
     char* seq;
     char* identifier;
-    char* nextGroupID; // Pointer to next identifier
-    
+	nextId* nId;
+	
     struct node* left_child;
     struct node* right_child;
     struct node* parent;
@@ -67,7 +74,8 @@ typedef avlNode** avlTree; // Represents a pointer to an avlTree
 // Function Prototypes
 avlTree avlTree_init(void);
 source* params_init(char* arg1, char* arg2);
-//avlNode* avlTree_insert(avlNode**, char* seq, char* identifier, char flag);
+void free_params(source* p);
+
 avlNode* avlTree_insert(avlNode**, avlNode*, char);
 int node_count(avlTree, char*seq);
 void inOrder_traversal(avlTree);
@@ -83,6 +91,8 @@ int resetHeight(avlNode* node);
 int comparator(const void* one, const void* two);
 int reverseComparator(const void* one, const void* two);
 
-void arrWrite(avlNode* arr[], int count, char* fileName);
+void arrWrite(avlNode* arr[], int count, source* parameters);
 void iterateWrite(avlNode* arr[], FILE *fp, int count);
 
+nextId* setFirst(char* identifier);
+nextId* setNext(char* identifier, nextId* head);
