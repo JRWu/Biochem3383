@@ -20,7 +20,6 @@
  * Support for rebalancing tree to guarantee height balance
  * Support for comparisons if strcmp proves to be too unweildy
  *
- * May or May NOT support free() operations, as the operating system automatically
  * frees any memory that this program has reserved
  */
 
@@ -31,113 +30,127 @@
 #include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
-    // Call file input here
-    // Call tokenizer here
     
-    // Insert values afterwards
-//    avlTree_insert(seq, sequence, identifier);
-//    Call reset root
+    char* directoryIn = (char*) argv[1];
+    char* directoryOut = (char*) argv[2];
     
+    // Handle arguments to program
+    source* parameters = params_init(directoryIn, directoryOut);
     
-    
-    
-//    char* tabs = "\t"; // To append to the end of identifiers
-//    printf("TabTest: x,%sa  \n\n",tabs); // DEBUG PURPOSES ONLY
+    printf("In: %s\n",parameters->fileIn); // DEBUG
+    printf("Out: %s\n",parameters->fileOut); // DEBUG
     
     
     
-    // DEBUG PURPOSES TO MEASURE PERFORMANCE
+    free(parameters); // Done with parameters
+    exit(EXIT_SUCCESS);
+
+    
+    /*DETERMINE RUNTIME*/
     clock_t begin, end;
     double time_spent;
     begin = clock();
-    // DEBUG PURPOSES TO MEASURE PERFORMANCE
+    /*DETERMINE RUNTIME*/
     
     int inputs = 0;
-    
-
-    
-    
     char buffer[2048];
-    FILE *fp = fopen("rekeyed_tab.txt", "r");
+    FILE *fp = fopen(parameters->fileIn, "r");
+    // Split the string on delimiters here
+    
     avlTree seq;          // Store original sequences
     seq = avlTree_init();
+    int count = 0;
     
     if (fp == NULL)
     {
+        perror("ERROR: Could not read from file.\n");
+        exit(EXIT_FAILURE);
     }
     else
     {
-        char a[300]="";
-        char b[300]="";
-        char c[300]="";
-        char d[300]="";
-        char e[300]="";
-        char f[300]="";
-
+        char a[100]="";
+        char b[100]="";
+        char c[100]="";
+        char d[MAX_SEQ_LENGTH]="";
+        char e[100]="";
+        char f[100]="";
+        char flag = 's';
         
-        while ( (fgets(buffer,2048, fp)) != NULL) // LOOP THROUGH FILE
+        while ((fgets(buffer,1024, fp)) != NULL) // LOOP THROUGH FILE
         {
-            char* sequence = malloc(sizeof(d));
-            char* identifier = malloc(sizeof(a));
-            // LOOP THROUGH THE LINES
-            while (sscanf(buffer, " %s  %s %s %s %s %s ", a,b,c,d,e,f) == 6)
+            avlNode* insert = malloc (sizeof(avlNode)); // AD
+            
+            // Parse individual Newlines
+            while (sscanf(buffer, " %s %s %s %s %s %s ", a,b,c,d,e,f) == 6)
             {
+                //                printf("%s\n\n", a); // Represents gid
+                //                printf("%s\n\n", b);
+                //                printf("%s\n\n", c);
+                //                printf("%s\n\n", d); // Represents the value we want
+                //                printf("%s\n\n", e);
+                //                printf("%s\n\n", f);
                 
-//                printf("%s\n\n", a); // Represents gid
-//                printf("%s\n\n", b);
-//                printf("%s\n\n", c);
-//                printf("%s\n\n", d); // Represents the value we want
-//                printf("%s\n\n", e);
-//                printf("%s\n\n", f);
-                strncpy(sequence,d,300);
-                strncpy(identifier,a,300);
-
-                inputs ++;
-                break;
+                
+                char* sequence = malloc(strlen(d)+1); // + 1 byte for null term
+                char* identifier = malloc(strlen(a)+1); // + 1 byte for null term
+                strncpy(sequence,d,strlen(d));   // Copy buffer to mem
+                strncpy(identifier,a,strlen(a)); // Coppy id to mem
+                
+                /*
+                 NOTE: ID needs to be kept till read into groups file
+                 NOTE: SEQ can be discarded if another identical one is encountered
+                 */
+                insert->seq = sequence;          // Set seq
+                insert->identifier = identifier; // Set id
+                insert->gcount = 1;              // Assume 1st
+                inputs ++;                       // Debug purposes
+                break;                           // Inserted file info
             }
-            // D is not being reset, the act of sscanf in- will change it
             
-            avlTree_insert(seq, sequence, identifier);
+            avlTree_insert(seq, insert, flag);
             resetRoot(seq);
-            
-//            free(sequence);
-//            free (identifier);
-            
         }
-        int count =  totalNodes(seq);
-        printf("Total nodes: %d", count);
-        
+        count =  totalNodes(seq);
+        printf("Number of unique entries: %d\n", count);
     }
     fclose(fp);
     
+    //    inOrder_traversal(seq);   // Debug info later
     
-
+    int* index = malloc(sizeof(int)); // Used to set array indices
+    *index = 0;
+    avlNode* arr[count];
+    
+    populateArray(seq, arr, index);
+    // Build input array here, pass reference into the program
+    // During recurisve traversal increment the index and insertt he node
+    // Call qsort on the array which stores the data
     
     
+    // INSERT FLAG FOR ORDERING FILE HERE
+    qsort((void*)&arr, count, sizeof(void*), &comparator); // sort array
+    //qsort((void*)&arr, count, sizeof(void*), &reverseComparator);
+    /*--DEBUGGING PURPOSES REMOVE LATER--*/
+    
+    arrWrite(arr, count, directoryOut);
     
     end = clock();
     time_spent =   ((double)(end-begin)*1000)/CLOCKS_PER_SEC;
     
-    printf("\nInputs: %d",inputs);
+    printf("\nNumber of entries: %d",inputs);
     printf("\nTime: %fms \n", time_spent);
     
     
-    FILE *output;
-    output = fopen("rekeyed_tab_time.txt","a");
-    fprintf(output, "Inputs: %d \n",inputs);
-    fprintf(output, "Time: %fms \n", time_spent);
-    fprintf(output, "\n\n");
-    fclose(output);
     
     
+    /*USE THIS TO OBTAIN RUNTIME DATA FOR LABBOOK*/
+    //    FILE *output;
+    //    output = fopen("rekeyed_tab_time.txt","a");
+    //    fprintf(output, "Inputs: %d \n",inputs);
+    //    fprintf(output, "Time: %fms \n", time_spent);
+    //    fprintf(output, "\n\n");
+    //    fclose(output);
+    free(index);
     printf("\n\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
-    return 0;
+    exit(EXIT_SUCCESS);
 }
-
-
-
-
-
-
-
-
