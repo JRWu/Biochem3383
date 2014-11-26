@@ -7,7 +7,9 @@
 # Sorting: Theory: O(nlogn) but may approach O(n^2) in practice due to quicksort's random choice of pivots.
 
 # I will be implementing in C, with a potential tree (AVL/ balanced) structure.
-# Insertion: Theory: 2*O(nlogn) guaranteed performance for insertion.
-# Sorting: Theory: O(n) traversal of 2nd tree.
+# Insertion: Theory: O(logn) guaranteed performance for insertion.
+# Sorting: Theory: O(nlogn) (no change from previous)
 
-# Currently, the program takes approx 1 hour to process 200 000 000 basic strings, will do some heavier testing and potential multithreading of the CPU to produce better results.
+# Usage: 
+> make
+> ./group_gt1 directory_in/input_name.txt directory_out/output_name.txt
