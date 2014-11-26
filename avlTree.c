@@ -122,7 +122,6 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
         (*node)->seq = insert->seq;
         (*node)->height = 0;
         (*node)->nId = setFirst(insert->identifier);
-//        printf("identifier: %s(insert_function)\n",(*node)->nId->identifier);
     }
     else // Root is not null
     {
@@ -155,11 +154,8 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
         }
         else // same sequence
         {
-            //printf("c: %d\n",(*node)->gcount);
             (*node)->gcount++;
             (*node)->nId = setNext(insert->identifier, (*node)->nId);
-            //free(insert->seq);
-            //free(insert->identifier);
             return (*node);
         }
         
@@ -358,27 +354,28 @@ void traverseInsert(avlTree unsorted,avlTree sorted)
         {
             avlTree_insert(sorted,*unsorted, 'i');
             resetRoot(sorted);
-            //            printf("gcount: %d\n", (*unsorted)->gcount);
         }
         traverseInsert(&(*unsorted)->right_child,sorted);
-        //        free(*unsorted); // DEBUG MIGHT HAVE TO REMOVE
     }
 }
 
 
+/*
+ * populateArary in-order traverses a tree and sets array indices accordingly
+ * @sorted is the tree containing sequences with calculated frequencies
+ * @arr is the array to be written to
+ * @index is the current index of the array
+ */
 int populateArray(avlTree sorted, avlNode* arr[], int* index)
 {
     
     if ( (*sorted) != NULL)
     {
         populateArray (&(*sorted)->left_child, arr, index);
-        //        printf("sizeofarr[]:%lu\n", sizeof(arr[*index])); // correct size
-        //      printf("index: %d\n",*index);
-        //    printf("count: %d\n",*(&(*sorted)->gcount));
         arr[*index] = (*sorted);
         (*index)++;
-        
         populateArray (&(*sorted)->right_child, arr, index);
+        
         return 1;
     }
     return 0;
@@ -455,7 +452,7 @@ int reverseComparator (const void* one, const void* two)
 void arrWrite(avlNode* arr[], int count, source* parameters)
 {
     FILE* fp;
-    DIR* dOut;
+    DIR* dOut; // Directory to write out
     dOut = opendir(parameters->dirOut);
     if (dOut == NULL)
     {
@@ -488,33 +485,30 @@ void arrWrite(avlNode* arr[], int count, source* parameters)
  */
 void iterateWrite(avlNode* arr[], FILE *fp, int count)
 {
-    FILE* fwp = fopen("reads_in_groups_c.txt", "w");
-    // MUST ADD HADNLING FOR ARRAY
+    FILE* fwp = fopen("reads_in_groups.txt", "w");
+
     int index; // Index of the array
-    for (index = 0; index < count; index ++)
+    for (index = 0; index < count; index ++) // Iterate through all seq's
     {
         if ((*(arr[index])).gcount > 1) // Add selection here for number
         {
+            /*groups.txt*/
             fprintf(fp, ">lcl|%d|num|%d|\t", index, (*(arr[index])).gcount);
             fprintf(fp, "%s\n", (*(arr[index])).seq);
+            /*groups.txt*/
             
-
-            
-            fprintf(fwp, "%d",index);
+            /*reads_in_groups.txt*/
+            fprintf(fwp, "%d",index); // Represents $groups{$k}
             while ((*arr[index]).nId != NULL)
             {
-//                printf("    id: %s\n", (*arr[index]).nId->identifier);
-                fprintf(fwp,"%s",(*arr[index]).nId->identifier);
+                fprintf(fwp,"%s",(*arr[index]).nId->identifier); // $gname{k}
                 (*arr[index]).nId = (*arr[index]).nId->next;
             }
             fprintf(fwp, "\n");
-            
-            
+            /*reads_in_groups.txt*/
         }
-        // Write code to free the pointers to data and seq as well
         free((arr[index])); // Free the data pointed to in array
     }
-    
     fclose(fwp);
 }
 
@@ -579,21 +573,6 @@ int totalNodes(avlTree tree)
     return 0;
 }
 
-
-/**
- * external determines if a given node is a leaf node
- * @node represents the node being checked
- * @return true if the node is external, false otherwise
- */
-bool external(avlNode node)
-{
-    if ((node).right_child == NULL && (node).left_child == NULL)
-    {
-        return true;
-    }
-    
-    return false;
-}
 
 int resetHeight(avlNode* node)
 {
@@ -710,14 +689,13 @@ int intComparator(avlNode* one, avlNode* two)
     else
     {
         return 1; // Fix this because inserting is O(n) at some points
-        //        return strcmp(one->seq, two->seq);
     }
-    
 }
 
 
 /*
  * setNext adds and identifier to the head of the "pseudo-linked-list"
+ * Will create list in "reverse" order, reverse relative to original program
  * @identifier is the ID being added for a sequence
  * @head is the CURRENT head of the linked list
  * @return the head of the list
@@ -733,25 +711,17 @@ nextId* setNext(char* identifier, nextId* head)
     // Can loop until null found
 }
 
+/*
+ * setFirst will set the first identifier for a unique sequence
+ * @identifier is the first identifier
+ * @return a pointer to the first identifier
+ */
 nextId* setFirst(char* identifier)
 {
     nextId* first = malloc(sizeof(nextId));
     first->identifier= identifier;
-//    first->identifier = malloc(strlen(identifier));
-    
     first->next = malloc(sizeof(NULL));
     first->next = NULL;
     
     return first;
 }
-
-
-/*
- * Get id that's not unique **
- * Invoke program, pass CURRENT HEAD
- * Create new node, set the ID
- * Make current head point to new head
- * return new head
- */
-
-

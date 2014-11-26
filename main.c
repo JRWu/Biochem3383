@@ -14,19 +14,9 @@
  * writes a file with the output of sorted sequences by "k" frequency
  *******************************************************************************/
 
-// TO ADD:
-/**
- * Support for selecting "k" most frequent
- * Support for rebalancing tree to guarantee height balance
- * Support for comparisons if strcmp proves to be too unweildy
- *
- * frees any memory that this program has reserved
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "avlTree.h"
-
 #include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
@@ -46,14 +36,14 @@ int main(int argc, const char * argv[]) {
     else
     {
         getcwd(dir,MAX_SEQ_LENGTH);
-        printf("dir: %s\n\n",dir); // DIR now contains current working director
+//        printf("dir: %s\n\n",dir); // DIR now contains current working director
         chdir(parameters->dirIn); // Change directory to directory with file
         fp = fopen(parameters->fileIn, "r");
     }
-    printf("Directory Name: %s|\n",parameters->dirIn);
+//    printf("Directory Name: %s|\n",parameters->dirIn);
     
     // ADD CODE TO SAVE CURRENT DIRECTORY BEFORE chdir(parameters->dirIN) is called
-    chdir(dir); // Go up a directory (CHANGE TO SAVE CURRENT LATER)
+    chdir(dir); // Go back to working directory
     
     
     /*DETERMINE RUNTIME*/
@@ -118,7 +108,8 @@ int main(int argc, const char * argv[]) {
         }
         
         count =  totalNodes(seq); // Count = number of UNIQUE entries
-        printf("Number of unique entries: %d\n", count);
+        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
+        printf("Number of unique entries: %d\n", count); // DEBUG REMOVE LATER
         free(insert);
     }
     fclose(fp);
@@ -134,8 +125,7 @@ int main(int argc, const char * argv[]) {
     end = clock();
     time_spent =   ((double)(end-begin)*1000)/CLOCKS_PER_SEC;
     
-    printf("\nNumber of entries: %d",inputs);
-    printf("\nTime: %fms \n", time_spent);
+    printf("Time: %fms \n", time_spent); // DEBUG REMOVE LATER
     
     
     /*USE THIS TO OBTAIN RUNTIME DATA FOR LABBOOK*/
@@ -145,6 +135,8 @@ int main(int argc, const char * argv[]) {
     //    fprintf(output, "Time: %fms \n", time_spent);
     //    fprintf(output, "\n\n");
     //    fclose(output);
+    
+    free(dir);
     free(parameters);
     free(index);
     printf("\n--Successful Exit!--\n\n"); // DEBUG REMOVE LATER
