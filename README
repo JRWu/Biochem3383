@@ -2,13 +2,7 @@
 #Copyright (c) 2014. All Rights Reserved.
 #Repository for Biochem3383F/G
 
-# Old implementation utilized perl, with hash table insetion and quicksort.
-# Insertion: Theory: O(1), but approaches O(n) in practice due to the sheer number of entries being inserted by property of rehashing.
-# Sorting: Theory: O(nlogn) but may approach O(n^2) in practice due to quicksort's random choice of pivots.
-
-# I will be implementing in C, with a potential tree (AVL/ balanced) structure.
-# Insertion: Theory: O(logn) guaranteed performance for insertion.
-# Sorting: Theory: O(nlogn) (no change from previous)
+# Can safely use on 60GB files, or ~100million sequence files for the moment- there is a bug that prevents freeing of allocated memory. I will be fixing this issue over christmas but feel free to use the program in the pipeline.
 
 # Usage: 
 > make
