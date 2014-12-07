@@ -18,15 +18,7 @@
 #include <string.h>
 #include "avlTree.h"
 
-avlNode* root;
-
-
 // Function Prototypes (private functions)
-avlNode* tallerChild(avlNode* n);
-int computeHeight(avlNode* node);
-void MakeLeftChild (avlNode* a, avlNode* b);
-void MakeRightChild (avlNode* a, avlNode* b);
-bool balanced (avlNode * node);
 int intComparator(avlNode*, avlNode*);
 void traverseWrite(avlTree sorted, FILE *fp);
 
@@ -67,11 +59,13 @@ source* params_init(char* arg1, char* arg2)
     
     char argument1[strlen(arg1)]; // Hold copy- strtok consumes original
     char argument2[strlen(arg2)]; // Hold copy- strtok consumes original
+
     memcpy(argument1, arg1, strlen(arg1));
     memcpy(argument2, arg2, strlen(arg2));
     
     count = (int)strlen(arg1);
-    char* x = strtok(arg1,"/");
+
+    char* x = strtok(arg1,"/"); // Separate on "/"
     while (x != NULL)
     {
         params->fileIn = x;
@@ -81,18 +75,20 @@ source* params_init(char* arg1, char* arg2)
     params->dirIn = malloc(count*sizeof(char));
     memcpy(params->dirIn, argument1, count);
     count = (int)strlen(arg2);
+
     char* y = strtok(arg2,"/");
     while (y != NULL)
     {
         params->fileOut = y;
-        y = strtok(NULL,"/");
+        y = strtok(NULL,"/"); // Split string on "/"
     }
     count = count - (int)strlen(params->fileOut);
     params->dirOut = malloc(count*sizeof(char));
-    memcpy(params->dirOut, argument2, count);
+    memcpy(params->dirOut, argument2, count); // Save output directory
     
     return params;
 }
+
 
 /*
  * free_params frees allocated memory for arguments for group_gt1
@@ -117,10 +113,16 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
     if (*node == NULL)
     {
         (*node) = malloc (sizeof(avlNode));
+
+        if (node == NULL) // Malloc guard for memory
+        {
+            perror("Out of memory: ");
+            exit (EXIT_FAILURE);
+        }
+        
         (*node)->gcount = insert->gcount;
         (*node)->identifier = insert->identifier;
         (*node)->seq = insert->seq;
-        (*node)->height = 0;
         (*node)->nId = setFirst(insert->identifier);
     }
     else // Root is not null
@@ -134,200 +136,38 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
         {
             comparator = intComparator( (*node), insert);
         }
-        avlNode* temp; //= malloc(sizeof(avlNode));
+        avlNode* temp; // For linking parent node
         
-        if (comparator < 0)
+        if (comparator < 0) // Lexicographically greater
         {
             avlTree_insert(&(*node)->right_child, insert, flag);
             temp = (*node)->right_child;
             (*node)->right_child->parent = *node;
-            //            (*node)->height = computeHeight(*node);   // Bottleneck...
-            //            (*node)->height = resetHeight(*node);
         }
-        else if (comparator > 0)
+        else if (comparator > 0) // Lexicographically less
         {
             avlTree_insert(&(*node)->left_child, insert, flag);
             temp = (*node)->left_child;
             (*node)->left_child->parent = *node;
-            //            (*node)->height = computeHeight(*node);   // Bottleneck...
-            //            (*node)->height = resetHeight(*node);
         }
-        else // same sequence
+        else // Same sequence encountered
         {
+//            free(insert->seq);
+            // CAN FREE SEQUENCES THAT ARE IDENTICAL HERE
+            // THIS WILL CONSERVE MEMORY
+            // IMPROVE HERE WHEN HAVE TIME
             (*node)->gcount++;
             (*node)->nId = setNext(insert->identifier, (*node)->nId);
             return (*node);
         }
-        
     }
     return (*node);
 }
 
 
 /**
- * triNodeRestructure takes an unbalanced node, its child, and its grandchild
- * compares the height differences of the nodes and restructures accordingly
- * Used to guarantee a tree with no height difference >1
- * @grandchild, @child, @unbalanced are nodes involved in restructuring
- * @return the pointer to a balanced node
- */
-avlNode* triNodeRestructure(avlNode* grandchild,avlNode* child, avlNode* unbalanced)
-{
-    avlNode* x = x = grandchild;
-    avlNode* y = y = child;
-    avlNode* z = z = unbalanced;
-    
-    // CASES
-    // ADD STRCMP HERE
-    // NOTE: If strcmp is too unweildy must fix this here (BOTTLENECK)
-    int zx = strcmp(z->seq, x->seq);
-    int xy = strcmp(x->seq, y->seq);
-    int zy = strcmp(z->seq, y->seq);
-    
-    // Might have to call malloc for these
-    avlNode* a;
-    avlNode* b;
-    avlNode* c;
-    
-    if(zx <= 0 && xy <= 0) // If z <= x and x<=y
-   	{
-        a = z;
-        b = x;
-        c = y;
-   	}
-    if (zx >= 0 && xy >= 0) // If z>=x and x >=y
-   	{
-        a = y;
-        b = x;
-        c = z;
-   	}
-   	if (zy <= 0 && xy >=0) // If z<=y and y <=x
-   	{
-        a = z;
-        b = y;
-        c = x;
-   	}
-   	if(zy >=0 && xy <=0)//, or If z>=y and y >=x
-   	{
-        a = x;
-        b = y;
-        c = z;
-   	}
-   	
-    
-    if (z->parent == NULL ) // Reached root
-    {
-        // Set left and right of b as z's left and right
-        // set left parent and right parent of z as b
-        // Remove parent of b
-        b->parent = NULL;
-    }
-    else // Replacing Z
-    {
-        if (z->parent->left_child == z)
-        {
-            MakeLeftChild(z->parent, b);
-        }
-        else
-        {
-            MakeRightChild(z->parent,b);
-        }
-    }
-    
-    if (b->left_child != x && b->left_child != y && b->left_child != z)
-    {
-        MakeRightChild(a, b->left_child);
-    }
-    
-    if (b->right_child != x && b->right_child != y && b->right_child != z)
-    {
-        MakeLeftChild(c, b->right_child);
-    }
-    
-    MakeLeftChild(b,a);
-    MakeRightChild(b,c);
-    
-    return b;
-}
-
-
-/**
- * tallerChild takes a node and returns the taller of the 2 subtrees
- * If even heights are returned, it will return subtree based on parental origin
- * @n is the node being compared
- * @return higher subtree given a node
- */
-avlNode* tallerChild(avlNode* n)
-{
-    int left = 0;
-    int right = 0;
-    
-    if (n->left_child != NULL)
-    {
-        left = n->left_child->height;
-    }
-    if (n->right_child != NULL)
-    {
-        right = n->right_child->height;
-    }
-    
-    if (left > right)
-    {
-        return n->left_child;
-    }
-    else if(left < right)
-    {
-        return n->right_child;
-    }
-    
-    else
-    {
-        int comparator = strcmp (n->seq, n->parent->seq);
-        if (comparator < 0) // < 0 if n->seq less than n->parent->seq
-        {
-            return n->left_child;
-        }
-        else
-        {
-            return n->right_child;
-        }
-    }
-    
-}
-
-
-
-/**
- * MakeLeftChild takes a node, and makes it the left child of another
- * @a is the parent
- * @b becomes left child of a
- */
-void MakeLeftChild (avlNode* a, avlNode* b)
-{
-    a->left_child = b;
-    if (b!=NULL)
-    {
-        b->parent = a;
-    }
-}
-
-/**
- * MakeRightChild takes a node, and makes it the right child of another
- * @a is the parent
- * @b becomes right child of a
- */
-void MakeRightChild (avlNode* a, avlNode* b)
-{
-    a->right_child = b;
-    if (b!= NULL)
-    {
-        b->parent = a;
-    }
-}
-
-
-/**
  * inOrder_traversal walks the tree from smallest to largest element
+ * CAN APPEND CODE INSIDE TO CHANGE FUNCTIONALITY OF FUNCTION
  * takes O(n) runtime, n being the number of elements in the tree
  * @tree is the tree being traversed
  */
@@ -336,26 +176,9 @@ void inOrder_traversal(avlTree tree)
     if (*tree != NULL)
     {
         inOrder_traversal( &(*tree)->left_child );
-        printf("Height: %d\n", (*tree)->height);    // DEBUG, REMOVE LATER
         printf("Seq: %s\n", (*tree)->seq);          // DEBUG, REMOVE LATER
         printf("gcount: %d\n\n", (*tree)->gcount);    // DEBUG, REMOVE LATER
         inOrder_traversal( &(*tree)->right_child );
-    }
-}
-
-void traverseInsert(avlTree unsorted,avlTree sorted)
-{
-    if (*unsorted != NULL)
-    {
-        traverseInsert(&(*unsorted)->left_child,sorted);
-        
-        // Every insertion coupled with a reset
-        if ( (*unsorted)->gcount > 1)
-        {
-            avlTree_insert(sorted,*unsorted, 'i');
-            resetRoot(sorted);
-        }
-        traverseInsert(&(*unsorted)->right_child,sorted);
     }
 }
 
@@ -380,7 +203,6 @@ int populateArray(avlTree sorted, avlNode* arr[], int* index)
     }
     return 0;
 }
-
 
 
 /*
@@ -411,37 +233,6 @@ int comparator(const void* one, const void* two)
         return 0;
     }
 }
-
-/*
- * reverseComparator is a comparator function for qsort
- * Is the opposite of the ordering and logic of the original 'group_gt1.pl'
- * @one is the pointer to element 1 being sorted
- * @two is the pointer to element 2 being sorted
- * @return smallest to greatest order
- */
-int reverseComparator (const void* one, const void* two)
-{
-    avlTree x = (avlNode**) one;
-    avlTree y = (avlNode**) two;
-    
-    int x1 = (*x)->gcount;
-    int x2 = (*y)->gcount;
-    
-    if (x1 > x2)
-    {
-        return 1; // Element 1 is bigger
-    }
-    else if (x1 < x2)
-    {
-        return -1; // Element 1 is smaller
-    }
-    else
-    {
-        return 0; // Same (return 0 for stability issues)
-    }
-    
-}
-
 
 /*
  * arrWrite takes an array of pointers to nodes, and writes its
@@ -490,7 +281,7 @@ void iterateWrite(avlNode* arr[], FILE *fp, int count)
     int index; // Index of the array
     for (index = 0; index < count; index ++) // Iterate through all seq's
     {
-        if ((*(arr[index])).gcount > 1) // Add selection here for number
+        if ((*(arr[index])).gcount > K) // Add selection here for number
         {
             /*groups.txt*/
             fprintf(fp, ">lcl|%d|num|%d|\t", index, (*(arr[index])).gcount);
@@ -514,46 +305,6 @@ void iterateWrite(avlNode* arr[], FILE *fp, int count)
 
 
 /*
- * fileWrite invokes traverseWrite to write sorted information to a file
- * @sorted is the sorted tree data structure
- */
-void fileWrite(avlTree sorted)
-{
-    FILE *fp;
-    fp = fopen ("groups_from_c.txt","w");
-    if (fp == NULL)
-    {
-        perror("ERROR: Could not write to file");
-    }
-    else
-    {
-        /* DEFAULT FORMAT FOLLOW THIS*/
-        //	print OUTG ">lcl|$groups{$k}|num|$gcount{$k}\t$k\n" if $gcount{$k} > 1;
-        //    print OUTN "$groups{$k}$gname{$k}\n" if $gcount{$k} > 1;
-        traverseWrite(sorted, fp);
-    }
-    fclose(fp);
-}
-
-/*
- * traverseWrite traverses a sorted tree to write its contents to a file
- * @sorted is the sorted tree
- * @fp is a pointer to the file being written to
- */
-void traverseWrite(avlTree sorted, FILE *fp)
-{
-    if (*sorted != NULL)
-    {
-        traverseWrite(&(*sorted)->right_child, fp);
-        fprintf(fp, ">lcl|xxx|num|%d|\n", (*sorted)->gcount);
-        fprintf(fp, "%s\n", (*sorted)->seq);
-        traverseWrite(&(*sorted)->left_child, fp);
-        free(*sorted); // DEBUG MIGHT HAVE TO REMOVE
-    }
-}
-
-
-/*
  * totalNodes recursively counts the number of nodes in a specified tree
  * @tree is the tree that's being counted
  * @return number of nodes in the tree (NOT INCLUDING LEAFS)
@@ -565,86 +316,11 @@ int totalNodes(avlTree tree)
     
     if (*tree != NULL)
     {
-        (*tree)->height = computeHeight(*tree); // DEBUG REMOVE LATER
         l = totalNodes( &(*tree)->left_child);
         r = totalNodes( &(*tree)->right_child);
         return (l + r + 1);
     }
     return 0;
-}
-
-
-int resetHeight(avlNode* node)
-{
-    int left = 0;
-    int right = 0;
-    if (node == NULL)
-    {
-        return 0;
-    }
-    if (node->left_child != NULL && node->seq != NULL)
-    {
-        left = (node->right_child)->height;
-    }
-    if (node -> right_child != NULL && node->seq != NULL)
-    {
-        right = (node->right_child)->height;
-    }
-    
-    return max(left, right);
-}
-
-/**
- * computeHeight takes a given node and recursively calculates its height
- * @node is the node whose height is being calculated
- * @return the height of the node
- */
-int computeHeight(avlNode * node)
-{
-    int left = 0;
-    int right = 0;
-    
-    
-    if (node->left_child != NULL)
-    {
-        left = computeHeight(node->left_child);
-    }
-    if (node -> right_child != NULL)
-    {
-        right = computeHeight(node->right_child);
-    }
-    
-    return (1 + max(left, right));
-}
-
-
-/*
- * balanced takes a node and returns if its subtrees differ by 2
- * @node is the node being compared
- * @return true if the height of subtrees is not 1, false otherwise
- */
-bool balanced (avlNode * node)
-{
-    int left = 0;
-    int right = 0;
-    
-    if (node->left_child != NULL)
-    {
-        left = node->left_child->height;
-    }
-    if (node->right_child != NULL)
-    {
-        right = node->right_child->height;
-    }
-    
-    if ( (abs(left - right)) > 1) // If height differs by > 1
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
 }
 
 /**
@@ -703,13 +379,11 @@ int intComparator(avlNode* one, avlNode* two)
 nextId* setNext(char* identifier, nextId* head)
 {
     nextId* next = malloc(sizeof(nextId)); // Create new node
-//    next->identifier = malloc(sizeof(strlen(identifier)));
     next->identifier = identifier; // Shouldn't need to malloc because just pointing to locations allocated by sequences**
-    
     next->next = head;
     return next;
-    // Can loop until null found
 }
+
 
 /*
  * setFirst will set the first identifier for a unique sequence
