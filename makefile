@@ -5,5 +5,5 @@ main.o: main.c avlTree.h
 avlTree.o: avlTree.c avlTree.h
 	cc -c avlTree.c avlTree.h
 clean:
-	rm -f sample *.o core
+	rm -f sample *.o core *.gch
 
