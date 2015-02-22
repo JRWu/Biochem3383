@@ -2,7 +2,9 @@
 #Copyright (c) 2014. All Rights Reserved.
 #Repository for Biochem3383F/G
 
-# Can safely use on 60GB files, or ~100million sequence files for the moment- there is a bug that prevents freeing of allocated memory. I will be fixing this issue over christmas but feel free to use the program in the pipeline.
+# Consumes ~351MB (less than the ~480MB consumed by the perl implementation) when invoked on rekeyed_tab.txt size 1.171Gb
+The memory usage of course, will scale higher with files that have a greater variety of sequences.
+If no memory issues were encountered with the perl implementation, no issues should be encountered here.
 
 # Usage: 
 > make
