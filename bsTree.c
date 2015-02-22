@@ -1,8 +1,8 @@
 /********************************************************************************
- * avlTree.c
+ * bsTree.c
  *
  * To be used as the data structure for group_gt1
- * Version 1.0
+ * Version 1.5
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
@@ -10,26 +10,26 @@
  * This software is Copyright 2014 Jia Rong Wu and is distrubuted under the terms
  * of the GNU General Public License.
  *
- * avlTree.c represents a tree data structure with guaranteed height (AVL)
+ * bsTree.c represents a tree data structure
  * Can be used for efficient sorting or storage of any STRING/INT values
  *******************************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
-#include "avlTree.h"
+#include "bsTree.h"
 
 // Function Prototypes (private functions)
-int intComparator(avlNode*, avlNode*);
-void traverseWrite(avlTree sorted, FILE *fp);
+int intComparator(bsNode*, bsNode*);
+void traverseWrite(bsTree sorted, FILE *fp);
 
 /**
- * avlTree_init allocates necessary memory for a pointer to the first element in a tree
+ * bsTree_init allocates necessary memory for a pointer to the first element in a tree
  * @return pointer to pointer of first node in tree
  */
-avlTree avlTree_init(void)
+bsTree bsTree_init(void)
 {
-    avlTree tree;
-    tree = (avlTree) malloc(sizeof(avlNode));
+    bsTree tree;
+    tree = (bsTree) malloc(sizeof(bsNode));
     *tree = NULL;
     return tree;
 }
@@ -103,63 +103,65 @@ void free_params(source* p)
 
 
 /**
- * avlTree_insert takes a sequence and identifier, and inserts it into a tree
+ * bsTree_insert takes a sequence and identifier, and inserts it into a tree
  * @s represents the sequence to be inserted
  * @id represents the identifier of the sequence
  * @return a pointer to the node that it was stored at
  */
-avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
+bsNode* bsTree_insert(bsNode** node, char *identifier, char* sequence, char flag)
 {
     if (*node == NULL)
     {
-        (*node) = malloc (sizeof(avlNode));
-
-        if (node == NULL) // Malloc guard for memory
+        (*node) = malloc(sizeof(bsNode));
+        
+        if (node == NULL)
         {
             perror("Out of memory: ");
             exit (EXIT_FAILURE);
         }
         
-        (*node)->gcount = insert->gcount;
-        (*node)->identifier = insert->identifier;
-        (*node)->seq = insert->seq;
-        (*node)->nId = setFirst(insert->identifier);
-    }
-    else // Root is not null
-    {
-        int comparator;
-        if (flag == 's')
-        {
-            comparator = strcmp((*node)->seq, insert->seq);
-        }
-        else
-        {
-            comparator = intComparator( (*node), insert);
-        }
-        avlNode* temp; // For linking parent node
+        // Memcpys are used to allocate memory as per-needed basis
+        // File sequences saved IFF they are unique
         
-        if (comparator < 0) // Lexicographically greater
+        (*node)->gcount = 1;
+        (*node)->identifier = malloc(strlen(identifier)+1);
+        memcpy((*node)->identifier,identifier,strlen(identifier));
+        
+        (*node)->seq = malloc(strlen(sequence)+1);
+        memcpy((*node)->seq, sequence, strlen(sequence));
+        
+        (*node)->nId = setFirst((*node)->identifier);
+        
+        // Malloc guard
+        if((*node)->identifier == NULL || (*node)->seq == NULL)
         {
-            avlTree_insert(&(*node)->right_child, insert, flag);
-            temp = (*node)->right_child;
+            perror("Out of Memory: ");
+            exit (EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        int comparator = 0;
+
+        // Check value of inserting sequence to old string
+        comparator = strcmp((*node)->seq,sequence);
+        
+        if (comparator < 0)
+        {
+            bsTree_insert(&(*node)->right_child,identifier, sequence, flag);
             (*node)->right_child->parent = *node;
         }
-        else if (comparator > 0) // Lexicographically less
+        else if (comparator > 0)
         {
-            avlTree_insert(&(*node)->left_child, insert, flag);
-            temp = (*node)->left_child;
+            bsTree_insert(&(*node)->left_child, identifier, sequence, flag);
             (*node)->left_child->parent = *node;
         }
-        else // Same sequence encountered
+        else // Sequence Already Exists
         {
-//            free(insert->seq);
-            // CAN FREE SEQUENCES THAT ARE IDENTICAL HERE
-            // THIS WILL CONSERVE MEMORY
-            // IMPROVE HERE WHEN HAVE TIME
-            (*node)->gcount++;
-            (*node)->nId = setNext(insert->identifier, (*node)->nId);
-            return (*node);
+            (*node)->gcount ++; // Increment occurence of sequence
+            (*node)->nId = setNext(identifier, (*node)->nId); // Append identifier
         }
+        return (*node);
     }
     return (*node);
 }
@@ -171,7 +173,7 @@ avlNode* avlTree_insert(avlNode** node, avlNode* insert, char flag)
  * takes O(n) runtime, n being the number of elements in the tree
  * @tree is the tree being traversed
  */
-void inOrder_traversal(avlTree tree)
+void inOrder_traversal(bsTree tree)
 {
     if (*tree != NULL)
     {
@@ -189,7 +191,7 @@ void inOrder_traversal(avlTree tree)
  * @arr is the array to be written to
  * @index is the current index of the array
  */
-int populateArray(avlTree sorted, avlNode* arr[], int* index)
+int populateArray(bsTree sorted, bsNode* arr[], int* index)
 {
     
     if ( (*sorted) != NULL)
@@ -214,8 +216,8 @@ int populateArray(avlTree sorted, avlNode* arr[], int* index)
  */
 int comparator(const void* one, const void* two)
 {
-    avlTree x = (avlNode**)one;
-    avlTree y = (avlNode**)two;
+    bsTree x = (bsNode**)one;
+    bsTree y = (bsNode**)two;
     
     int x1 = (*x)->gcount;
     int x2 = (*y)->gcount;
@@ -240,7 +242,7 @@ int comparator(const void* one, const void* two)
  * @arr[] is the array being read from
  * @count is the number of elements in the array
  */
-void arrWrite(avlNode* arr[], int count, source* parameters)
+void arrWrite(bsNode* arr[], int count, source* parameters)
 {
     FILE* fp;
     DIR* dOut; // Directory to write out
@@ -274,7 +276,7 @@ void arrWrite(avlNode* arr[], int count, source* parameters)
  * @fp is the pointer to the file being written into
  * @count is the count of the file
  */
-void iterateWrite(avlNode* arr[], FILE *fp, int count)
+void iterateWrite(bsNode* arr[], FILE *fp, int count)
 {
     FILE* fwp = fopen("reads_in_groups.txt", "w");
 
@@ -309,7 +311,7 @@ void iterateWrite(avlNode* arr[], FILE *fp, int count)
  * @tree is the tree that's being counted
  * @return number of nodes in the tree (NOT INCLUDING LEAFS)
  */
-int totalNodes(avlTree tree)
+int totalNodes(bsTree tree)
 {
     int l = 0;
     int r = 0;
@@ -327,7 +329,7 @@ int totalNodes(avlTree tree)
  * resetRoot resets the pointer to the root node after rebalance
  * @t is the tree being reset
  */
-void resetRoot (avlTree t)
+void resetRoot (bsTree t)
 {
     if (t == NULL)
     {
@@ -352,7 +354,7 @@ void resetRoot (avlTree t)
  * @num2 is 2nd number to be compared
  * returns >0 if 1 > 2, <0 if 1 < 2, or 0 if equal
  */
-int intComparator(avlNode* one, avlNode* two)
+int intComparator(bsNode* one, bsNode* two)
 {
     if (one->gcount > two->gcount)
     {
