@@ -116,6 +116,7 @@ bsNode* bsTree_insert(bsNode** node, char *identifier, char* sequence, char flag
         
         if (node == NULL)
         {
+            printf("Out of memory: ");
             perror("Out of memory: ");
             exit (EXIT_FAILURE);
         }
@@ -135,6 +136,7 @@ bsNode* bsTree_insert(bsNode** node, char *identifier, char* sequence, char flag
         // Malloc guard
         if((*node)->identifier == NULL || (*node)->seq == NULL)
         {
+            printf("Out of memory: ");
             perror("Out of Memory: ");
             exit (EXIT_FAILURE);
         }
@@ -300,6 +302,8 @@ void iterateWrite(bsNode* arr[], FILE *fp, int count)
             fprintf(fwp, "\n");
             /*reads_in_groups.txt*/
         }
+        free(arr[index]->identifier);
+        free(arr[index]->seq);
         free((arr[index])); // Free the data pointed to in array
     }
     fclose(fwp);

@@ -23,8 +23,11 @@ int main(int argc, const char * argv[]) {
     
     FILE* fp;
     char* dir = malloc(MAX_SEQ_LENGTH*sizeof(char));
-    char* directoryIn = (char*) argv[1];
-    char* directoryOut = (char*) argv[2];
+//    char* directoryIn = (char*) argv[1];
+//    char* directoryOut = (char*) argv[2];
+
+    char directoryIn[25] = "rekeyed_tab_file.txt";
+    char directoryOut[25] = "output.txt";
     
     // Handle arguments to program
     source* parameters = params_init(directoryIn, directoryOut);
@@ -54,7 +57,7 @@ int main(int argc, const char * argv[]) {
     
     if (fp == NULL)
     {
-        perror("ERROR: Could not read from file");
+        perror("ERROR: Could not read from file!");
         exit(EXIT_FAILURE);
     }
     else
@@ -65,7 +68,6 @@ int main(int argc, const char * argv[]) {
         char id_sequence[MAX_SEQ_LENGTH]=""; // Sequence l[3]
         char flag = 's';
         
-        bsNode* insert = malloc (sizeof(bsNode));
         // Read file into buffer for parsing individual lines
         while ((fgets(buffer,MAX_BUFFER_LEN, fp)) != NULL) // LOOP THROUGH FILE
         {
@@ -80,10 +82,10 @@ int main(int argc, const char * argv[]) {
             }
         }
         
-        count =  totalNodes(seq); // Count = number of UNIQUE entries
-        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
-        printf("Number of unique entries: %d\n", count); // DEBUG REMOVE LATER
-        free(insert);
+        count =  totalNodes(seq); // Count = number of UNIQUE entries (recursive)
+//        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
+//        printf("Number of unique entries: %d \n", count); // DEBUG REMOVE LATER
+        
     }
     fclose(fp);
     
@@ -92,20 +94,23 @@ int main(int argc, const char * argv[]) {
     // Malloc guard
     if (index == NULL)
     {
+        printf("Out of memory: ");
         perror("Out of memory: ");
         exit (EXIT_FAILURE);
     }
     
-    *index = 0;
-    bsNode* arr[count];    // Create array of pointers to nodes
-    populateArray(seq, arr, index);
+    *index = 0; // Set index to 0 for populating the array to be sorted
+    bsNode* arr = malloc(sizeof(bsNode*) * count);
+    populateArray(seq, (void*)arr, index);
     
-    qsort((void*)&arr, count, sizeof(void*), &comparator); // Sort on gcount
-    arrWrite(arr, count, parameters); // output 2 files in this function
+    qsort(arr, count, sizeof(void*), &comparator); // Sort on gcount
+    arrWrite((void*)arr, count, parameters); // output 2 files in this function
+    
 //    arrWrite2(arr,count);
+    free(arr);
     free(dir);
     free(parameters);
     free(index);
-    printf("Executed Successfully.\n");
+//    printf("Executed Successfully.\n");
     exit(EXIT_SUCCESS);
 }
