@@ -2,7 +2,7 @@
  * main.c
  *
  * To be used as: group_gt1.c
- * Version 1.5
+ * Version 1.6
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
@@ -14,40 +14,43 @@
  * writes a file with the output of sorted sequences by "k" frequency
  *******************************************************************************/
 
+
+// /Users/jia_wu/Library/Developer/Xcode/DerivedData/group_gt1-aauoqiwecskiuvapyiyhjiaowbws/Build/Products/Debug
+// ./group_gt1 data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
+// ^^ DEBUGGER INFO ^^
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "bsTree.h"
 #include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
-    
-    FILE* fp;
-    char* dir = malloc(MAX_SEQ_LENGTH*sizeof(char));
-//    char* directoryIn = (char*) argv[1];
-//    char* directoryOut = (char*) argv[2];
 
-    char directoryIn[25] = "rekeyed_tab_file.txt";
-    char directoryOut[25] = "output.txt";
+    // Allocate memory for the directories being used
+    int argInLen = (int) strlen(argv[1]);
+    int argOutLen = (int) strlen(argv[2]);
+    int dataLen = strlen("data_");
+    char* dirIn = malloc(argInLen + dataLen + 1); // +1 for null term
+    char* readsInGroups = malloc(argOutLen + dataLen + strlen("/reads_in_groups.txt") + 1);
+    char* groups = malloc(argOutLen + dataLen + strlen("/groups.txt") + 1);
     
-    // Handle arguments to program
-    source* parameters = params_init(directoryIn, directoryOut);
+    strcat (dirIn, argv[1]);
+    strcpy (readsInGroups, "data_");
+    strcpy (groups, "data_");
+    strcat (readsInGroups, argv[2]);
+    strcat (groups, argv[2]);
+    strcat (readsInGroups, "/reads_in_groups.txt");
+    strcat (groups, "/groups.txt");
     
-    DIR* dIn; // Source Directory
-    dIn = opendir(parameters->dirIn);
-    if (dIn == NULL)
-    {
-        fp = fopen(parameters->fileIn, "r");
-    }
-    else
-    {
-        getcwd(dir,MAX_SEQ_LENGTH);
-        chdir(parameters->dirIn); // Change directory to directory with file
-        fp = fopen(parameters->fileIn, "r");
-    }
+    // Ensures the directory names are correct and meaningful
+    printf("\n********************\n");
+    printf("dirIn: %s\n", dirIn);   // output data
+    printf("readsInGroupsdir:  %s\n", readsInGroups);
+    printf("groupsdir:  %s\n", groups);
+    printf("\n********************\n");
     
-    chdir(dir); // Go back to working directory
-
-
+    FILE* fp = fopen(dirIn, "r");
+    
     int inputs = 0; // Count total inputs
     int count = 0;  // Count unique inputs
     char buffer[MAX_BUFFER_LEN];
@@ -57,7 +60,7 @@ int main(int argc, const char * argv[]) {
     
     if (fp == NULL)
     {
-        perror("ERROR: Could not read from file!");
+        perror("ERROR: Could not read from file!\n");
         exit(EXIT_FAILURE);
     }
     else
@@ -83,8 +86,8 @@ int main(int argc, const char * argv[]) {
         }
         
         count =  totalNodes(seq); // Count = number of UNIQUE entries (recursive)
-//        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
-//        printf("Number of unique entries: %d \n", count); // DEBUG REMOVE LATER
+        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
+        printf("Number of unique entries: %d \n", count); // DEBUG REMOVE LATER
         
     }
     fclose(fp);
@@ -104,13 +107,12 @@ int main(int argc, const char * argv[]) {
     populateArray(seq, (void*)arr, index);
     
     qsort(arr, count, sizeof(void*), &comparator); // Sort on gcount
-    arrWrite((void*)arr, count, parameters); // output 2 files in this function
+    arrWrite((void*)arr, count, groups, readsInGroups); // output 2 files in this function
     
-//    arrWrite2(arr,count);
     free(arr);
-    free(dir);
-    free(parameters);
+    free(dirIn);
+    free(readsInGroups);
+    free(groups);
     free(index);
-//    printf("Executed Successfully.\n");
     exit(EXIT_SUCCESS);
 }

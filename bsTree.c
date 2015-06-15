@@ -2,7 +2,7 @@
  * bsTree.c
  *
  * To be used as the data structure for group_gt1
- * Version 1.5
+ * Version 1.6
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
@@ -244,9 +244,10 @@ int comparator(const void* one, const void* two)
  * @arr[] is the array being read from
  * @count is the number of elements in the array
  */
-void arrWrite(bsNode* arr[], int count, source* parameters)
+void arrWrite(bsNode* arr[], int count, char* groups, char* readsInGroups)
 {
     FILE* fp;
+    /*
     DIR* dOut; // Directory to write out
     dOut = opendir(parameters->dirOut);
     if (dOut == NULL)
@@ -258,7 +259,9 @@ void arrWrite(bsNode* arr[], int count, source* parameters)
         chdir(parameters->dirOut); // FIX LATEr, NOT WORKING
         fp = fopen(parameters->fileOut, "w");
     }
+    */
     
+    fp = fopen(groups, "w");
     if (fp == NULL)
     {
         perror("ERROR: Unable to write to file");
@@ -266,7 +269,7 @@ void arrWrite(bsNode* arr[], int count, source* parameters)
     }
     else
     {
-        iterateWrite(arr,fp, count); // Iteratively write elements to file
+        iterateWrite(arr,fp, readsInGroups, count); // Iteratively write elements to file
     }
     fclose(fp); // Close file
 }
@@ -278,9 +281,9 @@ void arrWrite(bsNode* arr[], int count, source* parameters)
  * @fp is the pointer to the file being written into
  * @count is the count of the file
  */
-void iterateWrite(bsNode* arr[], FILE *fp, int count)
+void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count)
 {
-    FILE* fwp = fopen("reads_in_groups.txt", "w");
+    FILE* fwp = fopen(readsInGroups, "w");
 
     int index; // Index of the array
     for (index = 0; index < count; index ++) // Iterate through all seq's
@@ -288,8 +291,11 @@ void iterateWrite(bsNode* arr[], FILE *fp, int count)
         if ((*(arr[index])).gcount > K) // Add selection here for number
         {
             /*groups.txt*/
-            fprintf(fp, ">lcl|%d|num|%d|\t", index, (*(arr[index])).gcount);
+            fprintf(fp, ">lcl|%d|num|%d\t", index, (*(arr[index])).gcount);
             fprintf(fp, "%s\n", (*(arr[index])).seq);
+
+            free( (*(arr[index])).seq);     // free memory as done
+            
             /*groups.txt*/
             
             /*reads_in_groups.txt*/
@@ -297,13 +303,15 @@ void iterateWrite(bsNode* arr[], FILE *fp, int count)
             while ((*arr[index]).nId != NULL)
             {
                 fprintf(fwp,"%s",(*arr[index]).nId->identifier); // $gname{k}
+                free((*arr[index]).nId->identifier);    // free memory as done
+                
                 (*arr[index]).nId = (*arr[index]).nId->next;
             }
             fprintf(fwp, "\n");
             /*reads_in_groups.txt*/
         }
-        free(arr[index]->identifier);
-        free(arr[index]->seq);
+//        free(arr[index]->identifier);
+//        free(arr[index]->seq);
         free((arr[index])); // Free the data pointed to in array
     }
     fclose(fwp);
@@ -385,7 +393,16 @@ int intComparator(bsNode* one, bsNode* two)
 nextId* setNext(char* identifier, nextId* head)
 {
     nextId* next = malloc(sizeof(nextId)); // Create new node
-    next->identifier = identifier; // Shouldn't need to malloc because just pointing to locations allocated by sequences**
+//    next->identifier = identifier; // Shouldn't need to malloc because just pointing to locations allocated by sequences**
+    
+    // DEBUG ADDED
+    next->identifier = malloc(strlen(identifier)+1);
+    memcpy(next->identifier,identifier,strlen(identifier));
+    
+    
+    // DEBUG ADDED
+    
+    
     next->next = head;
     return next;
 }

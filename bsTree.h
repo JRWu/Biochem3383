@@ -2,7 +2,7 @@
  * bsTree.h
  *
  * To be used as the data structure for group_gt1
- * Version 1.5
+ * Version 1.6
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
@@ -81,8 +81,8 @@ void fileWrite(bsTree sorted);
 int populateArray (bsTree sorted, bsNode* arr[], int* index);
 int comparator(const void* one, const void* two);
 
-void arrWrite(bsNode* arr[], int count, source* parameters);
-void iterateWrite(bsNode* arr[], FILE *fp, int count);
+void arrWrite(bsNode* arr[], int count, char* groups, char* readsInGroups);
+void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count);
 
 nextId* setFirst(char* identifier);
 nextId* setNext(char* identifier, nextId* head);
