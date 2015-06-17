@@ -125,8 +125,8 @@ void inOrder_traversal(bsTree tree)
     if (*tree != NULL)
     {
         inOrder_traversal( &(*tree)->left_child );
-        printf("Seq: %s\n", (*tree)->seq);          // DEBUG, REMOVE LATER
-        printf("gcount: %d\n\n", (*tree)->gcount);    // DEBUG, REMOVE LATER
+        printf("Seq: %s\n", (*tree)->seq);
+        printf("gcount: %d\n\n", (*tree)->gcount);
         inOrder_traversal( &(*tree)->right_child );
     }
 }
@@ -288,29 +288,6 @@ void resetRoot (bsTree t)
         }
     }
 }
-
-/**
- * intComparator takes 2 numbers, compares them
- * @num1 is first number to be compared
- * @num2 is 2nd number to be compared
- * returns >0 if 1 > 2, <0 if 1 < 2, or 0 if equal
- */
-int intComparator(bsNode* one, bsNode* two)
-{
-    if (one->gcount > two->gcount)
-    {
-        return 1;
-    }
-    else if (one->gcount < two->gcount)
-    {
-        return -1;
-    }
-    else
-    {
-        return 1; // Fix this because inserting is O(n) at some points
-    }
-}
-
 
 /*
  * setNext adds and identifier to the head of the "pseudo-linked-list"

@@ -33,10 +33,10 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#define MAX_SEQ_LENGTH 500  // Change this to accomodate sequenes
+#define MAX_SEQ_LENGTH 500  // Change this to accomodate sequences
 #define MAX_ID_LENGTH 100   // Change this to accomodate identifiers
-#define MAX_BUFFER_LEN 2048 // Buffer for reading in from sequence
-#define K   1   // Change this to select "k" most frequent
+#define MAX_BUFFER_LEN 2048 // Buffer for reading in from file
+#define K   1   // Change this to select "k" most frequent sequences
 
 
 /*
@@ -80,21 +80,17 @@ typedef bsNode** bsTree; // Represents a pointer to an bsTree
 
 // Function Prototypes
 bsTree bsTree_init(void);
-source* params_init(char* arg1, char* arg2);
-void free_params(source* p);
-
 bsNode* bsTree_insert(bsNode**, char*, char*, char);
+
 void inOrder_traversal(bsTree);
-
-void resetRoot (bsTree t);
-int totalNodes(bsTree t);
-void fileWrite(bsTree sorted);
-
 int populateArray (bsTree sorted, bsNode* arr[], int* index);
 int comparator(const void* one, const void* two);
 
 void arrWrite(bsNode* arr[], int count, char* groups, char* readsInGroups);
 void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count);
 
-nextId* setFirst(char* identifier);
+int totalNodes(bsTree t);
+void resetRoot (bsTree t);
+
 nextId* setNext(char* identifier, nextId* head);
+nextId* setFirst(char* identifier);

@@ -31,14 +31,6 @@
  * ./group_g1 data_BARIATRIC_PLATE1/rekeyed_tab.txt BARIATRIC_PLATE1
  *******************************************************************************/
 
-
-// /Users/jia_wu/Library/Developer/Xcode/DerivedData/group_gt1-aauoqiwecskiuvapyiyhjiaowbws/Build/Products/Debug
-
-//   C:  ./group_gt1 data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
-//PERL:  ./group_gt1_fileread.pl ../data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
-
-// ^^ DEBUGGER INFO ^^
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "bsTree.h"
@@ -66,7 +58,7 @@ int main(int argc, const char * argv[]) {
     printf("dirIn: %s\n", dirIn);   // output data
     printf("readsInGroupsdir:  %s\n", readsInGroups);
     printf("groupsdir:  %s\n", groups);
-    printf("\n********************\n");
+    printf("********************\n");
     
     FILE* fp = fopen(dirIn, "r");
     
@@ -105,9 +97,8 @@ int main(int argc, const char * argv[]) {
         }
         
         count =  totalNodes(seq); // Count = number of UNIQUE entries (recursive)
-        printf("Number of entries: %d\n",inputs); // DEBUG REMOVE LATER
-        printf("Number of unique entries: %d \n", count); // DEBUG REMOVE LATER
-        
+        printf("Number of entries: %d\n",inputs);
+        printf("Number of unique entries: %d \n", count);
     }
     fclose(fp);
     
