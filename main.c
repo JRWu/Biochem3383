@@ -1,28 +1,47 @@
 /********************************************************************************
  * main.c
  *
- * To be used as: group_gt1.c
- * Version 1.6
+ * To be used as part of: group_gt1.c
+ * Version 2.0
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
  *
- * This software is Copyright 2014 Jia Rong Wu and is distrubuted under the terms
- * of the GNU General Public License.
+ * This file is part of group_gt1.
+ * group_gt1 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
  *
- * main.c takes input from a tabbed file and sorts sequences
+ * group_gt1 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * Please consider citing https://github.com/JRWu/Biochem3383 when implementing.
+ *
+ *
+ * main.c takes input from a tabbed file and sorts DNA sequences up to 500nt in
+ * length. Utilizes a BST lexiographic categorizing with quicksort. 
  * writes a file with the output of sorted sequences by "k" frequency
+ *
+ * USAGE: ./group_gt1 NAME_OF_STUDY/tabbed_file.txt NAME_OF_STUDY\
+ * ./group_g1 data_BARIATRIC_PLATE1/rekeyed_tab.txt BARIATRIC_PLATE1
  *******************************************************************************/
 
 
 // /Users/jia_wu/Library/Developer/Xcode/DerivedData/group_gt1-aauoqiwecskiuvapyiyhjiaowbws/Build/Products/Debug
-// ./group_gt1 data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
+
+//   C:  ./group_gt1 data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
+//PERL:  ./group_gt1_fileread.pl ../data_BARIATRIC_PLATE1/formatted_reads.txt BARIATRIC_PLATE1
+
 // ^^ DEBUGGER INFO ^^
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "bsTree.h"
-#include <time.h>   // Double check the runtime of the function
 
 int main(int argc, const char * argv[]) {
 
@@ -68,7 +87,7 @@ int main(int argc, const char * argv[]) {
         char id[MAX_ID_LENGTH]="";          // Sequence identifier
         char misc[MAX_ID_LENGTH]="";
         char primer[MAX_ID_LENGTH]="";
-        char id_sequence[MAX_SEQ_LENGTH]=""; // Sequence l[3]
+        char id_sequence[MAX_SEQ_LENGTH]=""; // DNA sequence l[3]
         char flag = 's';
         
         // Read file into buffer for parsing individual lines
@@ -92,8 +111,8 @@ int main(int argc, const char * argv[]) {
     }
     fclose(fp);
     
-    int* index = malloc(sizeof(int)); // Used to set array indices
     
+    int* index = malloc(sizeof(int)); // Used to set array indices
     // Malloc guard
     if (index == NULL)
     {
@@ -109,10 +128,10 @@ int main(int argc, const char * argv[]) {
     qsort(arr, count, sizeof(void*), &comparator); // Sort on gcount
     arrWrite((void*)arr, count, groups, readsInGroups); // output 2 files in this function
     
-    free(arr);
     free(dirIn);
     free(readsInGroups);
     free(groups);
     free(index);
+    free(arr);
     exit(EXIT_SUCCESS);
 }

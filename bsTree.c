@@ -1,17 +1,29 @@
 /********************************************************************************
  * bsTree.c
  *
- * To be used as the data structure for group_gt1
- * Version 1.6
+ * To be used as the BST data structure for group_gt1
+ * Version 2.0
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
  *
- * This software is Copyright 2014 Jia Rong Wu and is distrubuted under the terms
- * of the GNU General Public License.
+ * This file is part of group_gt1.
+ * group_gt1 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * group_gt1 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * Please consider citing https://github.com/JRWu/Biochem3383 when implementing.
  *
  * bsTree.c represents a tree data structure
- * Can be used for efficient sorting or storage of any STRING/INT values
+ * Can be used for efficient sorting or storage of any STRING/INT values.
  *******************************************************************************/
 
 #include <stdlib.h>
@@ -32,73 +44,6 @@ bsTree bsTree_init(void)
     tree = (bsTree) malloc(sizeof(bsNode));
     *tree = NULL;
     return tree;
-}
-
-/*
- * params_init initializes a pointer to group_gt1's arguments
- * @arg1 is the input directory + filename
- * @arg2 is the output directory + filename
- * @return pointer with in/out directory and in/out filename
- */
-source* params_init(char* arg1, char* arg2)
-{
-    if (arg1 == NULL) // No input argument
-    {
-        printf("ERROR: No source directory specified.\n");
-        printf("Usage: ./group_gt1 'source_dir/filename.txt' 'destination_dir'\n");
-        exit(EXIT_FAILURE);
-    }
-    if (arg2 == NULL) // No output argument
-    {
-        printf("ERROR: No destination directory specified.\n");
-        printf("USAGE: ./group_gt1 'source_dir/filename.txt' 'destination_dir'\n");
-        exit (EXIT_FAILURE);
-    }
-    source* params = malloc(sizeof(source));
-    int count;
-    
-    char argument1[strlen(arg1)]; // Hold copy- strtok consumes original
-    char argument2[strlen(arg2)]; // Hold copy- strtok consumes original
-
-    memcpy(argument1, arg1, strlen(arg1));
-    memcpy(argument2, arg2, strlen(arg2));
-    
-    count = (int)strlen(arg1);
-
-    char* x = strtok(arg1,"/"); // Separate on "/"
-    while (x != NULL)
-    {
-        params->fileIn = x;
-        x = strtok(NULL,"/");
-    }
-    count = count - (int)strlen(params->fileIn);
-    params->dirIn = malloc(count*sizeof(char));
-    memcpy(params->dirIn, argument1, count);
-    count = (int)strlen(arg2);
-
-    char* y = strtok(arg2,"/");
-    while (y != NULL)
-    {
-        params->fileOut = y;
-        y = strtok(NULL,"/"); // Split string on "/"
-    }
-    count = count - (int)strlen(params->fileOut);
-    params->dirOut = malloc(count*sizeof(char));
-    memcpy(params->dirOut, argument2, count); // Save output directory
-    
-    return params;
-}
-
-
-/*
- * free_params frees allocated memory for arguments for group_gt1
- * @p is the pointer to the parameters
- */
-void free_params(source* p)
-{
-    free (p->dirIn);
-    free (p->dirOut);
-    free(p);
 }
 
 
@@ -247,19 +192,6 @@ int comparator(const void* one, const void* two)
 void arrWrite(bsNode* arr[], int count, char* groups, char* readsInGroups)
 {
     FILE* fp;
-    /*
-    DIR* dOut; // Directory to write out
-    dOut = opendir(parameters->dirOut);
-    if (dOut == NULL)
-    {
-        fp = fopen(parameters->fileOut, "w");
-    }
-    else
-    {
-        chdir(parameters->dirOut); // FIX LATEr, NOT WORKING
-        fp = fopen(parameters->fileOut, "w");
-    }
-    */
     
     fp = fopen(groups, "w");
     if (fp == NULL)
@@ -294,8 +226,7 @@ void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count)
             fprintf(fp, ">lcl|%d|num|%d\t", index, (*(arr[index])).gcount);
             fprintf(fp, "%s\n", (*(arr[index])).seq);
 
-            free( (*(arr[index])).seq);     // free memory as done
-            
+            free( (*(arr[index])).seq);     // free memory for DNA
             /*groups.txt*/
             
             /*reads_in_groups.txt*/
@@ -303,15 +234,13 @@ void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count)
             while ((*arr[index]).nId != NULL)
             {
                 fprintf(fwp,"%s",(*arr[index]).nId->identifier); // $gname{k}
-                free((*arr[index]).nId->identifier);    // free memory as done
+                free((*arr[index]).nId->identifier);    // free memory for IDENTIFIER
                 
                 (*arr[index]).nId = (*arr[index]).nId->next;
             }
             fprintf(fwp, "\n");
             /*reads_in_groups.txt*/
         }
-//        free(arr[index]->identifier);
-//        free(arr[index]->seq);
         free((arr[index])); // Free the data pointed to in array
     }
     fclose(fwp);
@@ -393,16 +322,8 @@ int intComparator(bsNode* one, bsNode* two)
 nextId* setNext(char* identifier, nextId* head)
 {
     nextId* next = malloc(sizeof(nextId)); // Create new node
-//    next->identifier = identifier; // Shouldn't need to malloc because just pointing to locations allocated by sequences**
-    
-    // DEBUG ADDED
-    next->identifier = malloc(strlen(identifier)+1);
+       next->identifier = malloc(strlen(identifier)+1);
     memcpy(next->identifier,identifier,strlen(identifier));
-    
-    
-    // DEBUG ADDED
-    
-    
     next->next = head;
     return next;
 }

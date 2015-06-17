@@ -1,17 +1,29 @@
 /********************************************************************************
  * bsTree.h
  *
- * To be used as the data structure for group_gt1
- * Version 1.6
+ * To be used as the BST data structure for group_gt1
+ * Version 2.0
  *
  * Author: Jia Rong Wu
  * jwu424@uwo.ca
  *
- * This software is Copyright 2014 Jia Rong Wu and is distrubuted under the terms
- * of the GNU General Public License.
+ * This file is part of group_gt1.
+ * group_gt1 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * group_gt1 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * Please consider citing https://github.com/JRWu/Biochem3383 when implementing.
  *
  * bsTree.h represents the typedefs and function prototypes that represent a
- * tree data structure
+ * tree data structure.
  *******************************************************************************/
 #ifndef group_gt1_bsTree
 #define group_gt1_bsTree
