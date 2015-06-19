@@ -119,6 +119,7 @@ int main(int argc, const char * argv[]) {
     qsort(arr, count, sizeof(void*), &comparator); // Sort on gcount
     arrWrite((void*)arr, count, groups, readsInGroups); // output 2 files in this function
     
+    free(seq);
     free(dirIn);
     free(readsInGroups);
     free(groups);

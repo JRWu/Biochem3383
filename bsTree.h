@@ -80,6 +80,7 @@ typedef bsNode** bsTree; // Represents a pointer to an bsTree
 
 // Function Prototypes
 bsTree bsTree_init(void);
+void free_tree(bsTree*);
 bsNode* bsTree_insert(bsNode**, char*, char*, char);
 
 void inOrder_traversal(bsTree);

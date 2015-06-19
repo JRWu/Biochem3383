@@ -46,6 +46,14 @@ bsTree bsTree_init(void)
     return tree;
 }
 
+/**
+ * free_tree frees the memory allocated for a pointer to the tree
+ * @tree is the tree being deallocated
+ */
+void free_tree(bsTree* tree)
+{
+    free(tree);
+}
 
 /**
  * bsTree_insert takes a sequence and identifier, and inserts it into a tree
@@ -68,7 +76,6 @@ bsNode* bsTree_insert(bsNode** node, char *identifier, char* sequence, char flag
         
         // Memcpys are used to allocate memory as per-needed basis
         // File sequences saved IFF they are unique
-        
         (*node)->gcount = 1;
         (*node)->identifier = malloc(strlen(identifier)+1);
         memcpy((*node)->identifier,identifier,strlen(identifier));
@@ -224,6 +231,7 @@ void iterateWrite(bsNode* arr[], FILE *fp,char* readsInGroups, int count)
         {
             /*groups.txt*/
             fprintf(fp, ">lcl|%d|num|%d\t", index, (*(arr[index])).gcount);
+
             fprintf(fp, "%s\n", (*(arr[index])).seq);
 
             free( (*(arr[index])).seq);     // free memory for DNA
@@ -315,8 +323,6 @@ nextId* setFirst(char* identifier)
 {
     nextId* first = malloc(sizeof(nextId));
     first->identifier= identifier;
-    first->next = malloc(sizeof(NULL));
     first->next = NULL;
-    
     return first;
 }
