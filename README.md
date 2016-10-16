@@ -1,7 +1,7 @@
 # group_gt1_C
 This program is an intermediate step in the processing of 16S rRNA genes. 
 It generates a fasta file given an input of RNA-sequences and identifiers. 
-Uses a binary tree-based algorithm to lexicographically sort and categorize RNA strings.
+Uses a binary tree-based algorithm to lexicographically and categorize RNA strings.
 Sorts resulting array of pointers using quicksort by identifier count. 
 
 group_gt1_C is written to improve the performance of the workflow_e.sh pipeline.
